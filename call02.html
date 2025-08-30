@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Emergency Dispatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            dark: '#1d4ed8'
+                        },
+                        secondary: {
+                            DEFAULT: '#e11d48',
+                            dark: '#be123c'
+                        },
+                        dark: {
+                            DEFAULT: '#0f172a',
+                            light: '#1e293b'
+                        },
+                        light: '#f8fafc'
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'ping-fast': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .emergency-card {
+            transition: all 0.3s ease;
+        }
+        .emergency-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .priority-fire {
+            border-left: 4px solid #ef4444;
+        }
+        .priority-medical {
+            border-left: 4px solid #3b82f6;
+        }
+        .priority-theft {
+            border-left: 4px solid #f59e0b;
+        }
+        .priority-high {
+            border-left: 4px solid #e11d48;
+        }
+        .priority-critical {
+            border-left: 4px solid #dc2626; /* A darker red for critical */
+        }
+        .priority-medium {
+            border-left: 4px solid #f59e0b; /* Orange for medium */
+        }
+        .priority-low {
+            border-left: 4px solid #10b981; /* Green for low */
+        }
+
+        .map-container {
+            height: 300px;
+            background-color: #e5e7eb;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNlNWU3ZWIiLz48cGF0aCBkPSJNMCAwSDYwVjYwSDAiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgMTVjLTguMjg0IDAtMTUgNi43MTYtMTUgMTVzNi43MTYgMTUgMTUgMTUgMTUtNi43MTYgMTUtMTUtNi43MTYtMTUtMTUtMTVtMC0xNUM0Mi40MzEgMCA1MiA5LjU2OSA1MiAyMXMtOS41NjkgMjEtMjEgMjFTMTAgMzIuNDMxIDEwIDIxIDE5LjU2OSAwIDMwIDAiIGZpbGw9IiNjY2MiIG9wYWNpdHk9Ii4yNSIvPjwvc3ZnPg==');
+            background-size: cover; /* Ensure the pattern covers the container */
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .blink {
+            animation: blink-animation 1s steps(5, start) infinite;
+        }
+        @keyframes blink-animation {
+            to { visibility: hidden; }
+        }
+        .page-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(0);
+        }
+        .page-hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            transform: translateX(100%); /* Slide out to the right */
+        }
+        .page-visible {
+            opacity: 1;
+            position: static; /* Make it take up space when visible */
+            transform: translateX(0);
+        }
+        /* Notification/Toast styles */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.error {
+            background-color: #f44336; /* Red */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark min-h-screen transition-colors duration-300 font-sans">
+    <nav class="bg-primary dark:bg-dark-light text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-broadcast-tower text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">Metro Emergency Dispatch</span>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <button data-page="dashboard" class="nav-link px-3 py-2 rounded-md text-sm font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+                        <button data-page="dispatch" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+                        <button data-page="units" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+                        <button data-page="reports" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+                        <button data-page="settings" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="notifications-btn" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark relative">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="absolute top-0 right-0 bg-secondary rounded-full w-4 h-4 flex items-center justify-center text-xs hidden">0</span>
+                        </button>
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-dark-light rounded-md shadow-lg z-50 py-1">
+                            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">Notifications</p>
+                            </div>
+                            <div id="notifications-list" class="max-h-60 overflow-y-auto">
+                                <div class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">No new notifications</div>
+                            </div>
+                            <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
+                                <a href="#" class="text-xs text-primary dark:text-blue-300 hover:underline">View all</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-blue-200 dark:text-blue-300">Dispatcher</p>
+                            <p class="text-sm font-medium" id="dispatcher-name">Officer <span id="dispatcher-id">#ED-${Math.floor(1000 + Math.random() * 9000)}</span></p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="md:hidden bg-primary dark:bg-dark-light px-4 py-2">
+        <div class="flex overflow-x-auto space-x-2">
+            <button data-page="dashboard" class="nav-link px-3 py-1 rounded-md text-xs font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+            <button data-page="dispatch" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+            <button data-page="units" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+            <button data-page="reports" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+            <button data-page="settings" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 relative">
+        <div id="dashboard-page" class="page-transition page-visible">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dispatch Dashboard</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-300">Status:</span>
+                        <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Real-time emergency call monitoring and dispatch</p>
+            </div>
+
+            <div id="alert-banner" class="hidden bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 dark:text-yellow-300"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="alert-message" class="text-sm text-yellow-700 dark:text-yellow-200"></p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button id="dismiss-alert" class="text-yellow-700 dark:text-yellow-200 hover:text-yellow-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Received Calls</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="received-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="received-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Dispatched</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="dispatched-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="dispatched-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="pending-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="high-priority">0</span> high priority</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Active Units</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="active-units">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="available-units">0</span> available</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300">
+                            <i class="fas fa-car-side"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Emergency Map</h2>
+                            <div class="flex space-x-2">
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                                </button>
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-layer-group mr-1"></i> Layers
+                                </button>
+                            </div>
+                        </div>
+                        <div class="map-container relative">
+                            <div id="map-overlay" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 z-10 hidden">
+                                <div class="bg-white dark:bg-dark-light p-4 rounded-md shadow-lg">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">Loading real-time data...</p>
+                                </div>
+                            </div>
+                            <div id="map-markers" class="absolute inset-0 pointer-events-none">
+                                </div>
+                            <div class="absolute bottom-4 right-4 z-10 flex space-x-2">
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-plus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-minus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                            </div>
+                            <p class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">Interactive map would appear here</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Active Incidents</h2>
+                            <button id="new-call-btn" class="text-xs px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-md">
+                                <i class="fas fa-plus mr-1"></i> New Call
+                            </button>
+                        </div>
+                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <div id="active-incidents-container">
+                                <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-inbox text-3xl mb-2"></i>
+                                    <p>No active incidents</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Dispatcher Console</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-md p-3 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">System Status</span>
+                                    <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Online</span>
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                    <p>Last sync: <span id="last-sync">Just now</span></p>
+                                    <p>Network: <span class="text-green-600 dark:text-green-400">Stable</span></p>
+                                    <p>System load: <span class="text-yellow-600 dark:text-yellow-400">Medium</span></p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <button id="dispatch-next-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fas fa-paper-plane mr-2"></i> Dispatch Next Priority
+                                </button>
+                                <button id="broadcast-btn" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-bullhorn mr-2"></i> Broadcast Alert
+                                </button>
+                                <button id="panic-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> Emergency Panic
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+                            <button id="refresh-activity" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div id="recent-activity" class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 rounded-full p-2 text-blue-600 dark:text-blue-300">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">System initialized</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Dispatcher ready to receive calls</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Just now</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Units Status</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-2 rounded-md">
+                                    <p class="text-xs text-blue-800 dark:text-blue-200">Police</p>
+                                    <p class="text-lg font-bold" id="police-units">0</p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-300"><span id="police-available">0</span> available</p>
+                                </div>
+                                <div class="bg-red-50 dark:bg-red-900 p-2 rounded-md">
+                                    <p class="text-xs text-red-800 dark:text-red-200">Fire</p>
+                                    <p class="text-lg font-bold" id="fire-units">0</p>
+                                    <p class="text-xs text-red-600 dark:text-red-300"><span id="fire-available">0</span> available</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-2 rounded-md">
+                                    <p class="text-xs text-green-800 dark:text-green-200">EMS</p>
+                                    <p class="text-lg font-bold" id="ems-units">0</p>
+                                    <p class="text-xs text-green-600 dark:text-green-300"><span id="ems-available">0</span> available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dispatch-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Call Dispatch Center</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage and dispatch emergency calls</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Receive New Emergency Call</h2>
+                        <form id="new-call-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="caller-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Name</label>
+                                    <input type="text" id="caller-name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="caller-phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Phone</label>
+                                    <input type="tel" id="caller-phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="emergency-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Emergency Type</label>
+                                <select id="emergency-type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                    <option value="">Select emergency type</option>
+                                    <option value="Theft/Robbery">Theft/Robbery</option>
+                                    <option value="Medical Emergency">Medical Emergency</option>
+                                    <option value="Fire Incident">Fire Incident</option>
+                                    <option value="Traffic Accident">Traffic Accident</option>
+                                    <option value="Domestic Disturbance">Domestic Disturbance</option>
+                                    <option value="Suspicious Activity">Suspicious Activity</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                                    <input type="text" id="location" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</label>
+                                    <select id="priority" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                <textarea id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="reset" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Clear
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-phone-alt mr-2"></i> Receive Call
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-primary dark:text-blue-400">Pending Calls</h2>
+                            <div class="flex space-x-2">
+                                <button id="sort-priority-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sort-amount-down mr-1"></i> Priority
+                                </button>
+                                <button id="sort-time-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="far fa-clock mr-1"></i> Time
+                                </button>
+                                <button id="dispatch-selected-btn" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Dispatch Selected
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pending-calls-container" class="space-y-4">
+                            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-clipboard-list text-3xl mb-2"></i>
+                                <p>No pending calls</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Available Units</h2>
+                        <div id="available-units-list" class="space-y-3">
+                            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-truck-medical text-3xl mb-2"></i>
+                                <p>No units currently available for dispatch</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="units-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Unit Management</h1>
+                <p class="text-gray-600 dark:text-gray-400">Monitor and manage all emergency units.</p>
+            </div>
+
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-primary dark:text-blue-400">All Units</h2>
+                    <button class="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-md">
+                        <i class="fas fa-plus mr-1"></i> Add New Unit
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Unit ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Current Incident</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Known Location</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="units-table-body" class="bg-white dark:bg-dark-light divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No units registered yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="reports-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h1>
+                <p class="text-gray-600 dark:text-gray-400">Generate and view operational reports.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Incident Volume by Type</h2>
+                    <p class="text-gray-700 dark:text-gray-300">A chart showing the distribution of emergency call types.</p>
+                    <div class="mt-4 bg-gray-100 dark:bg-gray-700 h-48 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400">
+                        [Chart Placeholder: Incident Type]
+                    </div>
+                    <button class="mt-4 w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">Generate Report</button>
+                </div>
+
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Average Response Time</h2>
+                    <p class="text-gray-700 dark:text-gray-300">Key performance indicator for dispatch efficiency.</p>
+                    <div class="mt-4 bg-gray-100 dark:bg-gray-700 h-48 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400">
+                        [Chart Placeholder: Response Time]
+                    </div>
+                    <button class="mt-4 w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">View Details</button>
+                </div>
+
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Unit Utilization</h2>
+                    <p class="text-gray-700 dark:text-gray-300">Insights into how frequently units are dispatched.</p>
+                    <div class="mt-4 bg-gray-100 dark:bg-gray-700 h-48 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400">
+                        [Chart Placeholder: Unit Utilization]
+                    </div>
+                    <button class="mt-4 w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">Analyze Utilization</button>
+                </div>
+            </div>
+            <div class="mt-6 bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Historical Incidents Log</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Incident ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Priority</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dispatched Units</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historical-incidents-table-body" class="bg-white dark:bg-dark-light divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                                <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No historical incidents to display.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+                <p class="text-gray-600 dark:text-gray-400">Adjust application preferences.</p>
+            </div>
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">General Settings</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="theme-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Theme</label>
+                        <select id="theme-select" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <option value="system">System Preference</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notifications</label>
+                        <div class="mt-1 flex items-center">
+                            <input type="checkbox" id="enable-notifications" class="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary dark:border-gray-600 dark:bg-gray-700">
+                            <label for="enable-notifications" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Enable desktop notifications</label>
+                        </div>
+                    </div>
+                    <button class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        const currentPage = localStorage.getItem('currentPage') || 'dashboard';
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page-transition');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const newCallForm = document.getElementById('new-call-form');
+        const activeIncidentsContainer = document.getElementById('active-incidents-container');
+        const pendingCallsContainer = document.getElementById('pending-calls-container');
+        const receivedCountSpan = document.getElementById('received-count');
+        const dispatchedCountSpan = document.getElementById('dispatched-count');
+        const pendingCountSpan = document.getElementById('pending-count');
+        const activeUnitsSpan = document.getElementById('active-units');
+        const availableUnitsSpan = document.getElementById('available-units');
+        const highPrioritySpan = document.getElementById('high-priority');
+        const notificationBadge = document.getElementById('notification-badge');
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        const notificationsList = document.getElementById('notifications-list');
+        const dispatchNextBtn = document.getElementById('dispatch-next-btn');
+        const broadcastBtn = document.getElementById('broadcast-btn');
+        const panicBtn = document.getElementById('panic-btn');
+        const alertBanner = document.getElementById('alert-banner');
+        const alertMessage = document.getElementById('alert-message');
+        const dismissAlertBtn = document.getElementById('dismiss-alert');
+        const newCallButton = document.getElementById('new-call-btn');
+        const sortPriorityBtn = document.getElementById('sort-priority-btn');
+        const sortTimeBtn = document.getElementById('sort-time-btn');
+        const dispatchSelectedBtn = document.getElementById('dispatch-selected-btn');
+        const policeUnits = document.getElementById('police-units');
+        const fireUnits = document.getElementById('fire-units');
+        const emsUnits = document.getElementById('ems-units');
+        const policeAvailable = document.getElementById('police-available');
+        const fireAvailable = document.getElementById('fire-available');
+        const emsAvailable = document.getElementById('ems-available');
+        const unitsTableBody = document.getElementById('units-table-body'); // Added for units page
+        const historicalIncidentsTableBody = document.getElementById('historical-incidents-table-body'); // Added for reports page
+
+
+        let incidents = [];
+        let units = [
+            { id: 'P001', type: 'Police', status: 'available', currentIncident: null, location: 'Main Street', availableTimestamp: Date.now() },
+            { id: 'F001', type: 'Fire', status: 'available', currentIncident: null, location: 'Elm Street', availableTimestamp: Date.now() },
+            { id: 'M001', type: 'EMS', status: 'available', currentIncident: null, location: 'Oak Avenue', availableTimestamp: Date.now() },
+            { id: 'P002', type: 'Police', status: 'available', currentIncident: null, location: 'Maple Road', availableTimestamp: Date.now() },
+            { id: 'F002', type: 'Fire', status: 'dispatched', currentIncident: 'INC-20250714-002', location: 'Pine Lane', availableTimestamp: null },
+        ];
+        let notifications = [];
+        let callCounter = 0;
+        let todayReceivedCalls = 0;
+        let todayDispatchedCalls = 0;
+
+        const PRIORITY_ORDER = {
+            'critical': 4,
+            'high': 3,
+            'medium': 2,
+            'low': 1
+        };
+
+        // --- Utility Functions ---
+
+        function showToast(message, type = 'success', duration = 3000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, duration);
+        }
+
+        function addNotification(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            notifications.unshift({ message, type, timestamp });
+            updateNotificationsDropdown();
+            updateNotificationBadge();
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length; // Assuming a 'read' property
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+        }
+
+        function updateNotificationsDropdown() {
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = `<div class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">No new notifications</div>`;
+                return;
+            }
+
+            notificationsList.innerHTML = '';
+            notifications.slice(0, 5).forEach((notification, index) => { // Show max 5 recent notifications
+                const notificationItem = document.createElement('div');
+                notificationItem.className = `px-4 py-2 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : ''} hover:bg-gray-100 dark:hover:bg-gray-700`;
+                notificationItem.innerHTML = `
+                    <p class="text-sm text-gray-800 dark:text-gray-200">${notification.message}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${notification.timestamp}</p>
+                `;
+                notificationsList.appendChild(notificationItem);
+            });
+        }
+
+        function showPage(pageId) {
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('page-hidden');
+                    page.classList.add('page-visible');
+                    // For the dashboard page, trigger map resize/render if it has an interactive map
+                    if (pageId === 'dashboard' && typeof window.initializeMap === 'function') {
+                        // window.initializeMap(); // Call a function to re-initialize or resize your map if it exists
+                    }
+                } else {
+                    page.classList.remove('page-visible');
+                    page.classList.add('page-hidden');
+                }
+            });
+
+            navLinks.forEach(link => {
+                if (link.dataset.page === pageId) {
+                    link.classList.add('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.remove('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                } else {
+                    link.classList.remove('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.add('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                }
+            });
+
+            localStorage.setItem('currentPage', pageId);
+        }
+
+        // --- Dashboard Specific Functions ---
+
+        function updateDashboardStats() {
+            receivedCountSpan.textContent = incidents.length;
+            dispatchedCountSpan.textContent = incidents.filter(inc => inc.status === 'Dispatched' || inc.status === 'Resolved').length;
+            pendingCountSpan.textContent = incidents.filter(inc => inc.status === 'Pending').length;
+            highPrioritySpan.textContent = incidents.filter(inc => inc.status === 'Pending' && (inc.priority === 'high' || inc.priority === 'critical')).length;
+
+            activeUnitsSpan.textContent = units.length;
+            availableUnitsSpan.textContent = units.filter(unit => unit.status === 'available').length;
+
+            policeUnits.textContent = units.filter(unit => unit.type === 'Police').length;
+            fireUnits.textContent = units.filter(unit => unit.type === 'Fire').length;
+            emsUnits.textContent = units.filter(unit => unit.type === 'EMS').length;
+
+            policeAvailable.textContent = units.filter(unit => unit.type === 'Police' && unit.status === 'available').length;
+            fireAvailable.textContent = units.filter(unit => unit.type === 'Fire' && unit.status === 'available').length;
+            emsAvailable.textContent = units.filter(unit => unit.type === 'EMS' && unit.status === 'available').length;
+        }
+
+        function addActiveIncidentCard(incident) {
+            const card = document.createElement('div');
+            card.id = `incident-${incident.id}`;
+            card.className = `emergency-card bg-white dark:bg-dark-light rounded-lg shadow p-4 mb-4 priority-${incident.priority}`;
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-md font-bold text-gray-900 dark:text-white">${incident.type} <span class="text-gray-500 dark:text-gray-400 text-sm">#${incident.id}</span></h3>
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${getPriorityClass(incident.priority)}">${incident.priority.toUpperCase()}</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">Location: ${incident.location}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">${incident.description || 'No description provided.'}</p>
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span>Received: ${new Date(incident.timestamp).toLocaleTimeString()}</span>
+                    <span class="status-badge px-2 py-1 rounded-full text-xs font-semibold ${getStatusClass(incident.status)}">${incident.status}</span>
+                </div>
+                <div class="mt-3 flex justify-end space-x-2">
+                    <button data-id="${incident.id}" class="dispatch-incident-btn px-3 py-1 bg-primary text-white text-xs rounded-md hover:bg-primary-dark ${incident.status === 'Dispatched' || incident.status === 'Resolved' ? 'opacity-50 cursor-not-allowed' : ''}" ${incident.status === 'Dispatched' || incident.status === 'Resolved' ? 'disabled' : ''}>
+                        <i class="fas fa-paper-plane mr-1"></i> Dispatch
+                    </button>
+                    <button data-id="${incident.id}" class="resolve-incident-btn px-3 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600 ${incident.status === 'Resolved' ? 'opacity-50 cursor-not-allowed' : ''}" ${incident.status === 'Resolved' ? 'disabled' : ''}>
+                        <i class="fas fa-check-circle mr-1"></i> Resolve
+                    </button>
+                </div>
+            `;
+            activeIncidentsContainer.prepend(card); // Add new incidents to the top
+            updateEmptyState(activeIncidentsContainer, 'active-incidents-container', 'No active incidents');
+        }
+
+        function updateEmptyState(container, containerId, message) {
+            if (container.children.length === 0 || (container.children.length === 1 && container.children[0].classList.contains('empty-state'))) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'p-4 text-center text-gray-500 dark:text-gray-400 empty-state';
+                emptyState.innerHTML = `<i class="fas fa-inbox text-3xl mb-2"></i><p>${message}</p>`;
+                container.innerHTML = ''; // Clear existing content including previous empty state
+                container.appendChild(emptyState);
+            } else {
+                const existingEmptyState = container.querySelector('.empty-state');
+                if (existingEmptyState) {
+                    existingEmptyState.remove();
+                }
+            }
+        }
+
+
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'critical': return 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 blink';
+                case 'high': return 'bg-orange-200 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+                case 'medium': return 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                case 'low': return 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200';
+                default: return '';
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                case 'Dispatched': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                case 'Resolved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                case 'Cancelled': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+                default: return '';
+            }
+        }
+
+        function renderActiveIncidents() {
+            activeIncidentsContainer.innerHTML = ''; // Clear existing cards
+            incidents.filter(inc => inc.status !== 'Resolved' && inc.status !== 'Cancelled').sort((a, b) => {
+                // Sort by priority (critical > high > medium > low) then by timestamp (oldest first)
+                if (PRIORITY_ORDER[b.priority] !== PRIORITY_ORDER[a.priority]) {
+                    return PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority];
+                }
+                return new Date(a.timestamp) - new Date(b.timestamp);
+            }).forEach(incident => addActiveIncidentCard(incident));
+
+            updateEmptyState(activeIncidentsContainer, 'active-incidents-container', 'No active incidents');
+            updateDashboardStats();
+        }
+
+        // --- Dispatch Page Specific Functions ---
+
+        function addPendingCallCard(incident) {
+            const card = document.createElement('div');
+            card.id = `pending-call-${incident.id}`;
+            card.className = `bg-white dark:bg-dark-light rounded-lg shadow p-4 mb-3 border-l-4 priority-${incident.priority}`;
+            card.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Call #${incident.id} - ${incident.type}</h3>
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${getPriorityClass(incident.priority)}">${incident.priority.toUpperCase()}</span>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">Location: ${incident.location}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Received: ${new Date(incident.timestamp).toLocaleString()}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">${incident.description || 'No description provided.'}</p>
+                <div class="flex space-x-2 justify-end">
+                    <button data-id="${incident.id}" class="assign-unit-btn px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700">Assign Unit</button>
+                    <button data-id="${incident.id}" class="cancel-call-btn px-3 py-1 bg-red-600 text-white text-xs rounded-md hover:bg-red-700">Cancel</button>
+                </div>
+            `;
+            pendingCallsContainer.prepend(card);
+            updateEmptyState(pendingCallsContainer, 'pending-calls-container', 'No pending calls');
+            dispatchNextBtn.disabled = pendingCallsContainer.children.length === 0;
+            dispatchSelectedBtn.disabled = pendingCallsContainer.children.length === 0;
+        }
+
+        function renderPendingCalls() {
+            pendingCallsContainer.innerHTML = '';
+            incidents.filter(inc => inc.status === 'Pending').sort((a, b) => {
+                // Sort by priority (critical > high > medium > low) then by timestamp (oldest first)
+                if (PRIORITY_ORDER[b.priority] !== PRIORITY_ORDER[a.priority]) {
+                    return PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority];
+                }
+                return new Date(a.timestamp) - new Date(b.timestamp);
+            }).forEach(incident => addPendingCallCard(incident));
+
+            updateEmptyState(pendingCallsContainer, 'pending-calls-container', 'No pending calls');
+            dispatchNextBtn.disabled = incidents.filter(inc => inc.status === 'Pending').length === 0;
+            dispatchSelectedBtn.disabled = incidents.filter(inc => inc.status === 'Pending').length === 0;
+        }
+
+        // --- Units Page Specific Functions ---
+
+        function renderUnitsTable() {
+            unitsTableBody.innerHTML = ''; // Clear existing rows
+            if (units.length === 0) {
+                unitsTableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No units registered yet.</td></tr>`;
+                return;
+            }
+
+            units.forEach(unit => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${unit.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${unit.type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${unit.status === 'available' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">
+                            ${unit.status.charAt(0).toUpperCase() + unit.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${unit.currentIncident ? unit.currentIncident : 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${unit.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button data-unit-id="${unit.id}" class="edit-unit-btn text-primary hover:text-primary-dark mr-2">Edit</button>
+                        <button data-unit-id="${unit.id}" class="delete-unit-btn text-secondary hover:text-secondary-dark">Delete</button>
+                    </td>
+                `;
+                unitsTableBody.appendChild(row);
+            });
+        }
+
+        // --- Reports Page Specific Functions ---
+
+        function renderHistoricalIncidents() {
+            historicalIncidentsTableBody.innerHTML = ''; // Clear existing rows
+            const resolvedIncidents = incidents.filter(inc => inc.status === 'Resolved' || inc.status === 'Cancelled');
+
+            if (resolvedIncidents.length === 0) {
+                historicalIncidentsTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No historical incidents to display.</td></tr>`;
+                return;
+            }
+
+            resolvedIncidents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort by most recent first
+                .forEach(incident => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 dark:hover:bg-gray-700';
+                    row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${incident.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${incident.type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${incident.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityClass(incident.priority)}">${incident.priority.toUpperCase()}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${incident.dispatchedUnits.join(', ') || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(incident.status)}">${incident.status}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(incident.timestamp).toLocaleString()}</td>
+                `;
+                    historicalIncidentsTableBody.appendChild(row);
+                });
+        }
+
+
+        // --- Event Listeners and Initial Load ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage(currentPage);
+            updateDashboardStats();
+            renderActiveIncidents();
+            renderPendingCalls();
+            renderUnitsTable(); // Render units table on load
+            renderHistoricalIncidents(); // Render historical incidents on load
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const pageId = e.target.dataset.page + '-page';
+                showPage(pageId);
+                // Re-render content when navigating to ensure fresh data
+                if (e.target.dataset.page === 'dashboard') {
+                    renderActiveIncidents();
+                } else if (e.target.dataset.page === 'dispatch') {
+                    renderPendingCalls();
+                } else if (e.target.dataset.page === 'units') {
+                    renderUnitsTable();
+                } else if (e.target.dataset.page === 'reports') {
+                    renderHistoricalIncidents();
+                }
+            });
+        });
+
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Initialize dark mode based on localStorage or system preference
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        notificationsBtn.addEventListener('click', () => {
+            notificationsDropdown.classList.toggle('hidden');
+        });
+
+        // Close notifications dropdown if clicked outside
+        window.addEventListener('click', (e) => {
+            if (!notificationsBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        });
+
+        // --- Call Management Logic ---
+
+        newCallForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const callerName = document.getElementById('caller-name').value;
+            const callerPhone = document.getElementById('caller-phone').value;
+            const emergencyType = document.getElementById('emergency-type').value;
+            const location = document.getElementById('location').value;
+            const priority = document.getElementById('priority').value;
+            const description = document.getElementById('description').value;
+
+            callCounter++;
+            const incidentId = `INC-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${String(callCounter).padStart(3, '0')}`;
+
+            const newIncident = {
+                id: incidentId,
+                callerName,
+                callerPhone,
+                type: emergencyType,
+                location,
+                priority,
+                description,
+                timestamp: Date.now(),
+                status: 'Pending',
+                dispatchedUnits: []
+            };
+
+            incidents.unshift(newIncident); // Add to the beginning of the array
+            todayReceivedCalls++;
+
+            showToast(`New ${emergencyType} call received: #${incidentId}`, 'success');
+            addNotification(`New ${emergencyType} call at ${location} (Priority: ${priority.toUpperCase()})`);
+
+            renderActiveIncidents();
+            renderPendingCalls();
+            updateDashboardStats();
+            newCallForm.reset();
+        });
+
+        // Delegate event listener for dispatch and resolve buttons on active incidents
+        activeIncidentsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dispatch-incident-btn')) {
+                const incidentId = e.target.dataset.id;
+                // Redirect to dispatch page and potentially pre-select incident or show a modal
+                showPage('dispatch-page');
+                // You might want to add logic here to open a dispatch modal for this specific incident
+                showToast(`Dispatching for incident #${incidentId}`, 'info');
+            } else if (e.target.classList.contains('resolve-incident-btn')) {
+                const incidentId = e.target.dataset.id;
+                const incidentIndex = incidents.findIndex(inc => inc.id === incidentId);
+                if (incidentIndex !== -1) {
+                    incidents[incidentIndex].status = 'Resolved';
+                    showToast(`Incident #${incidentId} resolved.`, 'success');
+                    addNotification(`Incident #${incidentId} (${incidents[incidentIndex].type}) resolved.`);
+                    renderActiveIncidents();
+                    renderHistoricalIncidents(); // Update reports page
+                    updateDashboardStats();
+
+                    // Make units dispatched to this incident available again
+                    incidents[incidentIndex].dispatchedUnits.forEach(unitId => {
+                        const unit = units.find(u => u.id === unitId);
+                        if (unit) {
+                            unit.status = 'available';
+                            unit.currentIncident = null;
+                            unit.availableTimestamp = Date.now();
+                        }
+                    });
+                    renderUnitsTable(); // Update units table
+                }
+            }
+        });
+
+        // Delegate event listener for assign unit and cancel buttons on pending calls
+        pendingCallsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('assign-unit-btn')) {
+                const incidentId = e.target.dataset.id;
+                const incident = incidents.find(inc => inc.id === incidentId);
+                if (incident) {
+                    const availableUnit = units.find(unit => unit.status === 'available');
+                    if (availableUnit) {
+                        incident.status = 'Dispatched';
+                        incident.dispatchedUnits.push(availableUnit.id);
+                        availableUnit.status = 'dispatched';
+                        availableUnit.currentIncident = incidentId;
+                        availableUnit.availableTimestamp = null; // Unit is now busy
+
+                        todayDispatchedCalls++;
+                        showToast(`Unit ${availableUnit.id} dispatched to incident #${incidentId}`, 'success');
+                        addNotification(`Unit ${availableUnit.id} dispatched to incident #${incidentId} (${incident.type}).`);
+                    } else {
+                        showToast('No units available to dispatch!', 'error');
+                        addNotification('Dispatch failed: No units available.', 'error');
+                    }
+                    renderActiveIncidents();
+                    renderPendingCalls();
+                    renderUnitsTable(); // Update units table
+                    updateDashboardStats();
+                }
+            } else if (e.target.classList.contains('cancel-call-btn')) {
+                const incidentId = e.target.dataset.id;
+                const incidentIndex = incidents.findIndex(inc => inc.id === incidentId);
+                if (incidentIndex !== -1) {
+                    incidents[incidentIndex].status = 'Cancelled';
+                    showToast(`Incident #${incidentId} cancelled.`, 'info');
+                    addNotification(`Incident #${incidentId} (${incidents[incidentIndex].type}) cancelled.`);
+                    renderPendingCalls();
+                    renderActiveIncidents();
+                    renderHistoricalIncidents(); // Update reports page
+                    updateDashboardStats();
+                }
+            }
+        });
+
+        dispatchNextBtn.addEventListener('click', () => {
+            const pending = incidents.filter(inc => inc.status === 'Pending').sort((a, b) => {
+                // Sort by priority (critical > high > medium > low) then by timestamp (oldest first)
+                if (PRIORITY_ORDER[b.priority] !== PRIORITY_ORDER[a.priority]) {
+                    return PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority];
+                }
+                return new Date(a.timestamp) - new Date(b.timestamp);
+            });
+
+            if (pending.length > 0) {
+                const highestPriorityIncident = pending[0];
+                const availableUnit = units.find(unit => unit.status === 'available');
+
+                if (availableUnit) {
+                    highestPriorityIncident.status = 'Dispatched';
+                    highestPriorityIncident.dispatchedUnits.push(availableUnit.id);
+                    availableUnit.status = 'dispatched';
+                    availableUnit.currentIncident = highestPriorityIncident.id;
+                    availableUnit.availableTimestamp = null;
+
+                    todayDispatchedCalls++;
+                    showToast(`Unit ${availableUnit.id} dispatched to incident #${highestPriorityIncident.id}`, 'success');
+                    addNotification(`Unit ${availableUnit.id} dispatched to highest priority incident #${highestPriorityIncident.id}.`);
+                } else {
+                    showToast('No units available to dispatch for the next priority call!', 'error');
+                    addNotification('Dispatch failed: No units available.', 'error');
+                }
+            } else {
+                showToast('No pending calls to dispatch.', 'info');
+            }
+            renderActiveIncidents();
+            renderPendingCalls();
+            renderUnitsTable(); // Update units table
+            updateDashboardStats();
+        });
+
+        broadcastBtn.addEventListener('click', () => {
+            const message = prompt("Enter broadcast message:");
+            if (message) {
+                showToast(`Broadcast sent: "${message}"`, 'info', 5000);
+                addNotification(`Broadcast: "${message}"`);
+            }
+        });
+
+        panicBtn.addEventListener('click', () => {
+            alertBanner.classList.remove('hidden');
+            alertMessage.textContent = 'URGENT: Emergency Panic Button Activated! All units standby.';
+            showToast('Emergency Panic Activated!', 'error', 0); // show indefinitely
+            addNotification('CRITICAL: Emergency Panic Button Activated.', 'critical');
+        });
+
+        dismissAlertBtn.addEventListener('click', () => {
+            alertBanner.classList.add('hidden');
+            showToast('Emergency alert dismissed.', 'info');
+        });
+
+        newCallButton.addEventListener('click', () => {
+            showPage('dispatch-page');
+            document.getElementById('caller-name').focus(); // Focus on the first form field
+        });
+
+        sortPriorityBtn.addEventListener('click', () => {
+            incidents.sort((a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority]);
+            renderPendingCalls();
+            showToast('Pending calls sorted by Priority', 'info');
+        });
+
+        sortTimeBtn.addEventListener('click', () => {
+            incidents.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Oldest first
+            renderPendingCalls();
+            showToast('Pending calls sorted by Time (Oldest First)', 'info');
+        });
+
+
+        // --- Unit Management (for Units Page) ---
+        // You would typically have functions here to add, edit, delete units,
+        // and these would interact with your `units` array and `renderUnitsTable` function.
+        unitsTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('edit-unit-btn')) {
+                const unitId = e.target.dataset.unitId;
+                const unit = units.find(u => u.id === unitId);
+                if (unit) {
+                    // Implement edit functionality, e.g., open a modal
+                    alert(`Editing Unit: ${unit.id} (Type: ${unit.type}, Status: ${unit.status})`);
+                    // For a real app, you'd populate a form with unit details
+                    // and allow editing, then update the `units` array and call renderUnitsTable()
+                }
+            } else if (e.target.classList.contains('delete-unit-btn')) {
+                const unitId = e.target.dataset.unitId;
+                if (confirm(`Are you sure you want to delete unit ${unitId}?`)) {
+                    units = units.filter(u => u.id !== unitId);
+                    showToast(`Unit ${unitId} deleted.`, 'info');
+                    addNotification(`Unit ${unitId} removed from system.`);
+                    renderUnitsTable();
+                    updateDashboardStats();
+                }
+            }
+        });
+
+        // --- Reports (for Reports Page) ---
+        // You would integrate charting libraries (e.g., Chart.js) here
+        // to render actual charts based on your `incidents` data.
+        // For now, the placeholders remain.
+
+        // Initial setup for the dispatcher ID
+        document.getElementById('dispatcher-id').textContent = `#ED-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        // Update last sync time every minute
+        setInterval(() => {
+            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString();
+        }, 60000);
+
+    </script>
+</body>
+</html>

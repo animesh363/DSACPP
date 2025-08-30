@@ -1,0 +1,14 @@
+CaseID,Name,Type,Location,Time,Status
+1001,Animesh,THEFT,jalandhar,1111,RECEIVED
+1001,Animesh,THEFT,jalandhar,1111,DISPATCHED
+1001,Pranav,MEDICAL,patiyala,2005,RECEIVED
+1001,Pranav,MEDICAL,patiyala,2005,DISPATCHED
+1002,Pushkar,FIRE,phagwara,11:20,RECEIVED
+1002,Pushkar,FIRE,phagwara,11:20,DISPATCHED
+1003,mohit,FIRE,Ambala cant,11:50,RECEIVED
+1003,mohit,FIRE,Ambala cant,11:50,DISPATCHED
+1004,Annu shukla,MEDICAL,Maheru,11:34,RECEIVED
+1004,Annu shukla,MEDICAL,Maheru,11:34,DISPATCHED
+1005,Shivam,MEDICAL,Lpu,11:30,RECEIVED
+1006,Animesh Thakur,THEFT,Patyala,11:11,RECEIVED
+1006,Animesh Thakur,THEFT,Patyala,11:11,DISPATCHED

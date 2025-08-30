@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Emergency Dispatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            dark: '#1d4ed8'
+                        },
+                        secondary: {
+                            DEFAULT: '#e11d48',
+                            dark: '#be123c'
+                        },
+                        dark: {
+                            DEFAULT: '#0f172a',
+                            light: '#1e293b'
+                        },
+                        light: '#f8fafc'
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'ping-fast': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .emergency-card {
+            transition: all 0.3s ease;
+        }
+        .emergency-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .priority-fire {
+            border-left: 4px solid #ef4444;
+        }
+        .priority-medical {
+            border-left: 4px solid #3b82f6;
+        }
+        .priority-theft {
+            border-left: 4px solid #f59e0b;
+        }
+        .priority-high {
+            border-left: 4px solid #e11d48;
+        }
+        .priority-critical {
+            border-left: 4px solid #dc2626; /* A darker red for critical */
+        }
+        .priority-medium {
+            border-left: 4px solid #f59e0b; /* Orange for medium */
+        }
+        .priority-low {
+            border-left: 4px solid #10b981; /* Green for low */
+        }
+
+        .map-container {
+            height: 300px;
+            background-color: #e5e7eb;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNlNWU3ZWIiLz48cGF0aCBkPSJNMCAwSDYwVjYwSDAiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgMTVjLTguMjg0IDAtMTUgNi43MTYtMTUgMTVzNi43MTYgMTUgMTUgMTUgMTUtNi43MTYgMTUtMTUtNi43MTYtMTUtMTUtMTVtMC0xNUM0Mi40MzEgMCA1MiA5LjU2OSA1MiAyMXMtOS41NjkgMjEtMjEgMjFTMTAgMzIuNDMxIDEwIDIxIDE5LjU2OSAwIDMwIDAiIGZpbGw9IiNjY2MiIG9wYWNpdHk9Ii4yNSIvPjwvc3ZnPg==');
+            background-size: cover; /* Ensure the pattern covers the container */
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .blink {
+            animation: blink-animation 1s steps(5, start) infinite;
+        }
+        @keyframes blink-animation {
+            to { visibility: hidden; }
+        }
+        .page-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(0);
+        }
+        .page-hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            transform: translateX(100%); /* Slide out to the right */
+        }
+        .page-visible {
+            opacity: 1;
+            position: static; /* Make it take up space when visible */
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark min-h-screen transition-colors duration-300 font-sans">
+    <nav class="bg-primary dark:bg-dark-light text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-broadcast-tower text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">Metro Emergency Dispatch</span>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <button data-page="dashboard" class="nav-link px-3 py-2 rounded-md text-sm font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+                        <button data-page="dispatch" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+                        <button data-page="units" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+                        <button data-page="reports" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+                        <button data-page="settings" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="notifications-btn" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark relative">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="absolute top-0 right-0 bg-secondary rounded-full w-4 h-4 flex items-center justify-center text-xs hidden">0</span>
+                        </button>
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-dark-light rounded-md shadow-lg z-50 py-1">
+                            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">Notifications</p>
+                            </div>
+                            <div id="notifications-list" class="max-h-60 overflow-y-auto">
+                                <div class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">No new notifications</div>
+                            </div>
+                            <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
+                                <a href="#" class="text-xs text-primary dark:text-blue-300 hover:underline">View all</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-blue-200 dark:text-blue-300">Dispatcher</p>
+                            <p class="text-sm font-medium" id="dispatcher-name">Officer <span id="dispatcher-id">#ED-${Math.floor(1000 + Math.random() * 9000)}</span></p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="md:hidden bg-primary dark:bg-dark-light px-4 py-2">
+        <div class="flex overflow-x-auto space-x-2">
+            <button data-page="dashboard" class="nav-link px-3 py-1 rounded-md text-xs font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+            <button data-page="dispatch" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+            <button data-page="units" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+            <button data-page="reports" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+            <button data-page="settings" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 relative">
+        <div id="dashboard-page" class="page-transition page-visible">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dispatch Dashboard</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-300">Status:</span>
+                        <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Real-time emergency call monitoring and dispatch</p>
+            </div>
+
+            <div id="alert-banner" class="hidden bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 dark:text-yellow-300"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="alert-message" class="text-sm text-yellow-700 dark:text-yellow-200"></p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button id="dismiss-alert" class="text-yellow-700 dark:text-yellow-200 hover:text-yellow-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Received Calls</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="received-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="received-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Dispatched</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="dispatched-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="dispatched-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="pending-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="high-priority">0</span> high priority</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Active Units</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="active-units">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="available-units">0</span> available</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300">
+                            <i class="fas fa-car-side"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Emergency Map</h2>
+                            <div class="flex space-x-2">
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                                </button>
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-layer-group mr-1"></i> Layers
+                                </button>
+                            </div>
+                        </div>
+                        <div class="map-container relative">
+                            <div id="map-overlay" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 z-10 hidden">
+                                <div class="bg-white dark:bg-dark-light p-4 rounded-md shadow-lg">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">Loading real-time data...</p>
+                                </div>
+                            </div>
+                            <div id="map-markers" class="absolute inset-0 pointer-events-none">
+                                </div>
+                            <div class="absolute bottom-4 right-4 z-10 flex space-x-2">
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-plus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-minus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                            </div>
+                            <p class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">Interactive map would appear here</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Active Incidents</h2>
+                            <button id="new-call-btn" class="text-xs px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-md">
+                                <i class="fas fa-plus mr-1"></i> New Call
+                            </button>
+                        </div>
+                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <div id="active-incidents-container">
+                                <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-inbox text-3xl mb-2"></i>
+                                    <p>No active incidents</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Dispatcher Console</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-md p-3 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">System Status</span>
+                                    <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Online</span>
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                    <p>Last sync: <span id="last-sync">Just now</span></p>
+                                    <p>Network: <span class="text-green-600 dark:text-green-400">Stable</span></p>
+                                    <p>System load: <span class="text-yellow-600 dark:text-yellow-400">Medium</span></p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <button id="dispatch-next-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fas fa-paper-plane mr-2"></i> Dispatch Next Priority
+                                </button>
+                                <button id="broadcast-btn" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-bullhorn mr-2"></i> Broadcast Alert
+                                </button>
+                                <button id="panic-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> Emergency Panic
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+                            <button id="refresh-activity" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div id="recent-activity" class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 rounded-full p-2 text-blue-600 dark:text-blue-300">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">System initialized</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Dispatcher ready to receive calls</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Just now</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Units Status</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-2 rounded-md">
+                                    <p class="text-xs text-blue-800 dark:text-blue-200">Police</p>
+                                    <p class="text-lg font-bold" id="police-units">0</p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-300"><span id="police-available">0</span> available</p>
+                                </div>
+                                <div class="bg-red-50 dark:bg-red-900 p-2 rounded-md">
+                                    <p class="text-xs text-red-800 dark:text-red-200">Fire</p>
+                                    <p class="text-lg font-bold" id="fire-units">0</p>
+                                    <p class="text-xs text-red-600 dark:text-red-300"><span id="fire-available">0</span> available</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-2 rounded-md">
+                                    <p class="text-xs text-green-800 dark:text-green-200">EMS</p>
+                                    <p class="text-lg font-bold" id="ems-units">0</p>
+                                    <p class="text-xs text-green-600 dark:text-green-300"><span id="ems-available">0</span> available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dispatch-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Call Dispatch Center</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage and dispatch emergency calls</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Receive New Emergency Call</h2>
+                        <form id="new-call-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="caller-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Name</label>
+                                    <input type="text" id="caller-name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="caller-phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Phone</label>
+                                    <input type="tel" id="caller-phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="emergency-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Emergency Type</label>
+                                <select id="emergency-type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                    <option value="">Select emergency type</option>
+                                    <option value="Theft/Robbery">Theft/Robbery</option>
+                                    <option value="Medical Emergency">Medical Emergency</option>
+                                    <option value="Fire Incident">Fire Incident</option>
+                                    <option value="Traffic Accident">Traffic Accident</option>
+                                    <option value="Domestic Disturbance">Domestic Disturbance</option>
+                                    <option value="Suspicious Activity">Suspicious Activity</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                                    <input type="text" id="location" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</label>
+                                    <select id="priority" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                <textarea id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="reset" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Clear
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-phone-alt mr-2"></i> Receive Call
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-primary dark:text-blue-400">Pending Calls</h2>
+                            <div class="flex space-x-2">
+                                <button id="sort-priority-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sort-amount-down mr-1"></i> Priority
+                                </button>
+                                <button id="sort-time-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="far fa-clock mr-1"></i> Time
+                                </button>
+                                <button id="dispatch-next-btn2" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fas fa-paper-plane mr-1"></i> Dispatch Next
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pending-calls-container" class="space-y-3">
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No pending emergency calls</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Dispatch Panel</h2>
+                        <div id="selected-call-details" class="mb-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Select a call from "Pending Calls" to view details and dispatch units.</p>
+                        </div>
+                        <form id="dispatch-form" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Assign Units</label>
+                                <div id="available-units-list" class="mt-1 space-y-2 max-h-48 overflow-y-auto pr-2">
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm">No units available.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="dispatch-notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dispatch Notes</label>
+                                <textarea id="dispatch-notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" id="cancel-dispatch-btn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-arrow-alt-circle-right mr-2"></i> Dispatch Call
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="units-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Emergency Units Management</h1>
+                <p class="text-gray-600 dark:text-gray-400">Overview and control of all available emergency response units</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-primary-dark dark:bg-dark text-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm">Total Units</p>
+                        <p class="text-2xl font-bold" id="total-units-stat">0</p>
+                    </div>
+                    <i class="fas fa-truck-medical text-3xl opacity-75"></i>
+                </div>
+                <div class="bg-green-600 dark:bg-green-800 text-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm">Available Units</p>
+                        <p class="text-2xl font-bold" id="available-units-stat">0</p>
+                    </div>
+                    <i class="fas fa-check-circle text-3xl opacity-75"></i>
+                </div>
+                <div class="bg-yellow-600 dark:bg-yellow-800 text-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm">Dispatched Units</p>
+                        <p class="text-2xl font-bold" id="dispatched-units-stat">0</p>
+                    </div>
+                    <i class="fas fa-map-marker-alt text-3xl opacity-75"></i>
+                </div>
+                <div class="bg-red-600 dark:bg-red-800 text-white rounded-lg shadow p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm">Offline Units</p>
+                        <p class="text-2xl font-bold" id="offline-units-stat">0</p>
+                    </div>
+                    <i class="fas fa-power-off text-3xl opacity-75"></i>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">All Units</h2>
+                    <button id="add-unit-btn" class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md text-sm">
+                        <i class="fas fa-plus mr-2"></i>Add New Unit
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Unit ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Current Incident</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Update</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="units-table-body" class="bg-white dark:bg-dark-light divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr id="no-units-row">
+                                <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No units registered. Click "Add New Unit" to add one.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="reports-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Operations Reports</h1>
+                <p class="text-gray-600 dark:text-gray-400">Generate and view operational reports for analysis</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Generate New Report</h2>
+                    <form id="report-form" class="space-y-4">
+                        <div>
+                            <label for="report-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Report Type</label>
+                            <select id="report-type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                <option value="">Select report type</option>
+                                <option value="daily">Daily Summary</option>
+                                <option value="weekly">Weekly Incident Overview</option>
+                                <option value="monthly">Monthly Performance</option>
+                                <option value="unit_activity">Unit Activity Log</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                                <input type="date" id="start-date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                                <input type="date" id="end-date" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="unit-select-report" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Unit (for Unit Activity)</label>
+                            <select id="unit-select-report" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <option value="">All Units</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <i class="fas fa-file-alt mr-2"></i> Generate Report
+                            </button>
+                        </div>
+                    </form>
+                    <div id="generated-report-view" class="mt-8 bg-gray-50 dark:bg-gray-800 p-4 rounded-md hidden">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Generated Report Preview</h3>
+                        <div id="report-content" class="text-gray-700 dark:text-gray-300 text-sm space-y-2">
+                            </div>
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                <i class="fas fa-print mr-1"></i> Print
+                            </button>
+                            <button class="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700">
+                                <i class="fas fa-download mr-1"></i> Download CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Recent Reports</h2>
+                        <div id="recent-reports-list" class="space-y-3">
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No reports generated yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">System Settings</h1>
+                <p class="text-gray-600 dark:text-gray-400">Configure application preferences and alerts</p>
+            </div>
+
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">General Settings</h2>
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <label for="dark-mode-setting" class="text-gray-700 dark:text-gray-300 font-medium">Dark Mode</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="dark-mode-setting" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+
+                    <div class="py-2 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Notification Preferences</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label for="notify-new-call" class="text-gray-600 dark:text-gray-400 text-sm">New Call Alerts</label>
+                                <input type="checkbox" id="notify-new-call" class="form-checkbox h-4 w-4 text-primary rounded" checked>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="notify-high-priority" class="text-gray-600 dark:text-gray-400 text-sm">High Priority Call Alerts</label>
+                                <input type="checkbox" id="notify-high-priority" class="form-checkbox h-4 w-4 text-primary rounded" checked>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label for="notify-unit-status" class="text-gray-600 dark:text-gray-400 text-sm">Unit Status Changes</label>
+                                <input type="checkbox" id="notify-unit-status" class="form-checkbox h-4 w-4 text-primary rounded" checked>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="py-2 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Alert Thresholds</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label for="pending-call-threshold" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Pending Calls before Alert</label>
+                                <input type="number" id="pending-call-threshold" value="3" min="1" class="mt-1 block w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="low-unit-threshold" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Available Units below Alert</label>
+                                <input type="number" id="low-unit-threshold" value="2" min="0" class="mt-1 block w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="py-2">
+                        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Dispatcher Profile</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="dispatcher-name-setting" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Name</label>
+                                <input type="text" id="dispatcher-name-setting" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="dispatcher-id-setting" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your ID</label>
+                                <input type="text" id="dispatcher-id-setting" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4">
+                        <button id="save-settings-btn" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="broadcast-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-dark-light rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Broadcast New Alert</h3>
+            <div class="mb-4">
+                <label for="broadcast-message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
+                <textarea id="broadcast-message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="Enter your broadcast message here..."></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="cancel-broadcast-btn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Cancel</button>
+                <button type="button" id="send-broadcast-btn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">Send Broadcast</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-unit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-dark-light rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Add New Emergency Unit</h3>
+            <form id="add-unit-form" class="space-y-4">
+                <div>
+                    <label for="unit-id-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit ID</label>
+                    <input type="text" id="unit-id-input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required placeholder="e.g., Police-001, Fire-A2">
+                </div>
+                <div>
+                    <label for="unit-type-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit Type</label>
+                    <select id="unit-type-input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                        <option value="">Select type</option>
+                        <option value="Police">Police</option>
+                        <option value="Fire">Fire</option>
+                        <option value="EMS">EMS</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="unit-status-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Status</label>
+                    <select id="unit-status-input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                        <option value="Available">Available</option>
+                        <option value="Dispatched">Dispatched</option>
+                        <option value="On Scene">On Scene</option>
+                        <option value="Returning">Returning</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-add-unit-btn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">Add Unit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // Global State
+        const state = {
+            darkMode: localStorage.getItem('darkMode') === 'enabled',
+            incidents: [],
+            units: [],
+            notifications: [],
+            dashboardStats: {
+                receivedCalls: 0,
+                receivedToday: 0,
+                dispatchedCalls: 0,
+                dispatchedToday: 0,
+                pendingCalls: 0,
+                highPriority: 0,
+                activeUnits: 0,
+                availableUnits: 0,
+                policeUnits: 0,
+                policeAvailable: 0,
+                fireUnits: 0,
+                fireAvailable: 0,
+                emsUnits: 0,
+                emsAvailable: 0,
+            },
+            dispatcher: {
+                name: "Officer",
+                id: `ED-${Math.floor(1000 + Math.random() * 9000)}`
+            },
+            settings: {
+                notifyNewCall: true,
+                notifyHighPriority: true,
+                notifyUnitStatus: true,
+                pendingCallThreshold: 3,
+                lowUnitThreshold: 2
+            },
+            selectedPendingCall: null,
+            recentActivities: [],
+            generatedReports: []
+        };
+
+        // DOM Elements
+        const body = document.body;
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeSettingToggle = document.getElementById('dark-mode-setting');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page-transition');
+
+        // Dashboard Elements
+        const receivedCountElem = document.getElementById('received-count');
+        const receivedTodayElem = document.getElementById('received-today');
+        const dispatchedCountElem = document.getElementById('dispatched-count');
+        const dispatchedTodayElem = document.getElementById('dispatched-today');
+        const pendingCountElem = document.getElementById('pending-count');
+        const highPriorityElem = document.getElementById('high-priority');
+        const activeUnitsElem = document.getElementById('active-units');
+        const availableUnitsElem = document.getElementById('available-units');
+        const policeUnitsElem = document.getElementById('police-units');
+        const policeAvailableElem = document.getElementById('police-available');
+        const fireUnitsElem = document.getElementById('fire-units');
+        const fireAvailableElem = document.getElementById('fire-available');
+        const emsUnitsElem = document.getElementById('ems-units');
+        const emsAvailableElem = document.getElementById('ems-available');
+        const lastSyncElem = document.getElementById('last-sync');
+        const activeIncidentsContainer = document.getElementById('active-incidents-container');
+        const newCallBtnDashboard = document.getElementById('new-call-btn');
+        const dispatchNextBtnDashboard = document.getElementById('dispatch-next-btn');
+        const broadcastBtn = document.getElementById('broadcast-btn');
+        const panicBtn = document.getElementById('panic-btn');
+        const recentActivityContainer = document.getElementById('recent-activity');
+        const refreshActivityBtn = document.getElementById('refresh-activity');
+
+        // Alert Banner
+        const alertBanner = document.getElementById('alert-banner');
+        const alertMessage = document.getElementById('alert-message');
+        const dismissAlertBtn = document.getElementById('dismiss-alert');
+
+        // Notifications
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationBadge = document.getElementById('notification-badge');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        const notificationsList = document.getElementById('notifications-list');
+
+        // Dispatch Page Elements
+        const newCallForm = document.getElementById('new-call-form');
+        const pendingCallsContainer = document.getElementById('pending-calls-container');
+        const sortPriorityBtn = document.getElementById('sort-priority-btn');
+        const sortTimeBtn = document.getElementById('sort-time-btn');
+        const dispatchNextBtnDispatch = document.getElementById('dispatch-next-btn2');
+        const selectedCallDetails = document.getElementById('selected-call-details');
+        const dispatchForm = document.getElementById('dispatch-form');
+        const availableUnitsList = document.getElementById('available-units-list');
+        const dispatchNotesInput = document.getElementById('dispatch-notes');
+        const cancelDispatchBtn = document.getElementById('cancel-dispatch-btn');
+
+        // Units Page Elements
+        const totalUnitsStat = document.getElementById('total-units-stat');
+        const availableUnitsStat = document.getElementById('available-units-stat');
+        const dispatchedUnitsStat = document.getElementById('dispatched-units-stat');
+        const offlineUnitsStat = document.getElementById('offline-units-stat');
+        const unitsTableBody = document.getElementById('units-table-body');
+        const addUnitBtn = document.getElementById('add-unit-btn');
+
+        // Reports Page Elements
+        const reportForm = document.getElementById('report-form');
+        const generatedReportView = document.getElementById('generated-report-view');
+        const reportContent = document.getElementById('report-content');
+        const unitSelectReport = document.getElementById('unit-select-report');
+        const recentReportsList = document.getElementById('recent-reports-list');
+
+        // Settings Page Elements
+        const notifyNewCallCheckbox = document.getElementById('notify-new-call');
+        const notifyHighPriorityCheckbox = document.getElementById('notify-high-priority');
+        const notifyUnitStatusCheckbox = document.getElementById('notify-unit-status');
+        const pendingCallThresholdInput = document.getElementById('pending-call-threshold');
+        const lowUnitThresholdInput = document.getElementById('low-unit-threshold');
+        const dispatcherNameSettingInput = document.getElementById('dispatcher-name-setting');
+        const dispatcherIdSettingInput = document.getElementById('dispatcher-id-setting');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const dispatcherNameElem = document.getElementById('dispatcher-name');
+        const dispatcherIdElem = document.getElementById('dispatcher-id');
+
+        // Modals
+        const broadcastModal = document.getElementById('broadcast-modal');
+        const broadcastMessageInput = document.getElementById('broadcast-message');
+        const cancelBroadcastBtn = document.getElementById('cancel-broadcast-btn');
+        const sendBroadcastBtn = document.getElementById('send-broadcast-btn');
+
+        const addUnitModal = document.getElementById('add-unit-modal');
+        const addUnitForm = document.getElementById('add-unit-form');
+        const unitIdInput = document.getElementById('unit-id-input');
+        const unitTypeInput = document.getElementById('unit-type-input');
+        const unitStatusInput = document.getElementById('unit-status-input');
+        const cancelAddUnitBtn = document.getElementById('cancel-add-unit-btn');
+
+
+        // Utility Functions
+        function saveState() {
+            localStorage.setItem('metroDispatchState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('metroDispatchState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                // Merge loaded state with default, ensuring new properties are added
+                Object.assign(state, {
+                    ...parsedState,
+                    dashboardStats: { // Deep merge for dashboardStats
+                        ...state.dashboardStats,
+                        ...parsedState.dashboardStats
+                    },
+                    dispatcher: { // Deep merge for dispatcher
+                        ...state.dispatcher,
+                        ...parsedState.dispatcher
+                    },
+                    settings: { // Deep merge for settings
+                        ...state.settings,
+                        ...parsedState.settings
+                    }
+                });
+                // Ensure dispatcher ID is retained if it was set
+                if (!state.dispatcher.id && state.dispatcher.name.includes('#ED-')) {
+                     state.dispatcher.id = state.dispatcher.name.split('#ED-')[1];
+                }
+            }
+        }
+
+
+        function updateTimeAgo(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const seconds = Math.floor((now - past) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (seconds < 60) return `${seconds}s ago`;
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true, month: 'short', day: 'numeric' });
+        }
+
+        function getPriorityColorClass(priority) {
+            switch (priority) {
+                case 'critical': return 'priority-critical border-red-700';
+                case 'high': return 'priority-high border-red-500';
+                case 'medium': return 'priority-medium border-yellow-500';
+                case 'low': return 'priority-low border-green-500';
+                default: return '';
+            }
+        }
+
+        function getUnitStatusColorClass(status) {
+            switch (status) {
+                case 'Available': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                case 'Dispatched': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                case 'On Scene': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                case 'Returning': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+                case 'Offline': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+            }
+        }
+
+        function addNotification(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            state.notifications.unshift({ message, type, timestamp });
+            if (state.notifications.length > 10) { // Keep only latest 10 notifications
+                state.notifications.pop();
+            }
+            updateNotificationsUI();
+            saveState();
+        }
+
+        function addActivity(title, description, iconClass, iconBgColor) {
+            const timestamp = new Date().toISOString();
+            state.recentActivities.unshift({ title, description, timestamp, iconClass, iconBgColor });
+            if (state.recentActivities.length > 5) { // Keep only latest 5 activities
+                state.recentActivities.pop();
+            }
+            updateRecentActivityUI();
+            saveState();
+        }
+
+        // UI Update Functions
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            if (state.darkMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeSettingToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeSettingToggle.checked = false;
+            }
+            saveState();
+        }
+
+        function updateNavActiveState(activePageId) {
+            navLinks.forEach(link => {
+                if (link.dataset.page === activePageId.replace('-page', '')) {
+                    link.classList.add('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.remove('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                } else {
+                    link.classList.remove('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.add('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                }
+            });
+        }
+
+        function showPage(pageId) {
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('page-hidden');
+                    page.classList.add('page-visible');
+                } else {
+                    page.classList.remove('page-visible');
+                    page.classList.add('page-hidden');
+                }
+            });
+            updateNavActiveState(pageId);
+        }
+
+        function updateDashboardStats() {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            state.dashboardStats.receivedCalls = state.incidents.length;
+            state.dashboardStats.receivedToday = state.incidents.filter(inc => new Date(inc.timestamp).getTime() >= todayStart).length;
+            state.dashboardStats.dispatchedCalls = state.incidents.filter(inc => inc.status === 'Dispatched' || inc.status === 'Completed').length;
+            state.dashboardStats.dispatchedToday = state.incidents.filter(inc => (inc.status === 'Dispatched' || inc.status === 'Completed') && new Date(inc.dispatchTime || inc.timestamp).getTime() >= todayStart).length; // Use dispatchTime if available
+            state.dashboardStats.pendingCalls = state.incidents.filter(inc => inc.status === 'Pending').length;
+            state.dashboardStats.highPriority = state.incidents.filter(inc => inc.status === 'Pending' && (inc.priority === 'high' || inc.priority === 'critical')).length;
+
+            state.dashboardStats.activeUnits = state.units.filter(unit => unit.status !== 'Offline').length;
+            state.dashboardStats.availableUnits = state.units.filter(unit => unit.status === 'Available').length;
+
+            state.dashboardStats.policeUnits = state.units.filter(unit => unit.type === 'Police').length;
+            state.dashboardStats.policeAvailable = state.units.filter(unit => unit.type === 'Police' && unit.status === 'Available').length;
+            state.dashboardStats.fireUnits = state.units.filter(unit => unit.type === 'Fire').length;
+            state.dashboardStats.fireAvailable = state.units.filter(unit => unit.type === 'Fire' && unit.status === 'Available').length;
+            state.dashboardStats.emsUnits = state.units.filter(unit => unit.type === 'EMS').length;
+            state.dashboardStats.emsAvailable = state.units.filter(unit => unit.type === 'EMS' && unit.status === 'Available').length;
+
+
+            receivedCountElem.textContent = state.dashboardStats.receivedCalls;
+            receivedTodayElem.textContent = state.dashboardStats.receivedToday;
+            dispatchedCountElem.textContent = state.dashboardStats.dispatchedCalls;
+            dispatchedTodayElem.textContent = state.dashboardStats.dispatchedToday;
+            pendingCountElem.textContent = state.dashboardStats.pendingCalls;
+            highPriorityElem.textContent = state.dashboardStats.highPriority;
+            activeUnitsElem.textContent = state.dashboardStats.activeUnits;
+            availableUnitsElem.textContent = state.dashboardStats.availableUnits;
+
+            policeUnitsElem.textContent = state.dashboardStats.policeUnits;
+            policeAvailableElem.textContent = state.dashboardStats.policeAvailable;
+            fireUnitsElem.textContent = state.dashboardStats.fireUnits;
+            fireAvailableElem.textContent = state.dashboardStats.fireAvailable;
+            emsUnitsElem.textContent = state.dashboardStats.emsUnits;
+            emsAvailableElem.textContent = state.dashboardStats.emsAvailable;
+
+            lastSyncElem.textContent = updateTimeAgo(new Date().toISOString());
+
+            // Check for alerts
+            checkAlerts();
+            saveState();
+        }
+
+        function checkAlerts() {
+            let message = '';
+            let show = false;
+
+            if (state.dashboardStats.pendingCalls >= state.settings.pendingCallThreshold) {
+                message = `High number of pending calls (${state.dashboardStats.pendingCalls}). Dispatch units promptly!`;
+                show = true;
+            } else if (state.dashboardStats.availableUnits <= state.settings.lowUnitThreshold) {
+                message = `Low number of available units (${state.dashboardStats.availableUnits}). Consider reassigning or requesting backup.`;
+                show = true;
+            }
+
+            if (show) {
+                alertMessage.textContent = message;
+                alertBanner.classList.remove('hidden');
+                alertBanner.classList.add('blink');
+            } else {
+                alertBanner.classList.add('hidden');
+                alertBanner.classList.remove('blink');
+            }
+        }
+
+        function updateNotificationsUI() {
+            notificationsList.innerHTML = '';
+            if (state.notifications.length === 0) {
+                notificationsList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">No new notifications</div>';
+                notificationBadge.classList.add('hidden');
+            } else {
+                state.notifications.forEach(notification => {
+                    const notificationItem = document.createElement('div');
+                    notificationItem.classList.add('px-4', 'py-2', 'border-b', 'border-gray-100', 'dark:border-gray-700', 'hover:bg-gray-50', 'dark:hover:bg-gray-700', 'cursor-pointer');
+                    notificationItem.innerHTML = `
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">${notification.message}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${updateTimeAgo(notification.timestamp)}</p>
+                    `;
+                    notificationsList.appendChild(notificationItem);
+                });
+                notificationBadge.textContent = state.notifications.length;
+                notificationBadge.classList.remove('hidden');
+            }
+        }
+
+        function updateActiveIncidentsUI() {
+            const activeIncidents = state.incidents.filter(inc => inc.status !== 'Completed' && inc.status !== 'Cancelled');
+            activeIncidentsContainer.innerHTML = '';
+
+            if (activeIncidents.length === 0) {
+                activeIncidentsContainer.innerHTML = `
+                    <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-inbox text-3xl mb-2"></i>
+                        <p>No active incidents</p>
+                    </div>
+                `;
+            } else {
+                activeIncidents.sort((a, b) => {
+                    const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority] || new Date(a.timestamp) - new Date(b.timestamp);
+                });
+
+                activeIncidents.forEach(incident => {
+                    const incidentCard = document.createElement('div');
+                    incidentCard.dataset.id = incident.id;
+                    incidentCard.classList.add('emergency-card', 'p-4', 'dark:text-white', getPriorityColorClass(incident.priority));
+                    incidentCard.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-md">${incident.type} - ${incident.location}</h3>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full ${incident.status === 'Pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}">${incident.status}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">${incident.description.substring(0, 70)}${incident.description.length > 70 ? '...' : ''}</p>
+                        <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>Caller: ${incident.callerName}</span>
+                            <span>Received: ${updateTimeAgo(incident.timestamp)}</span>
+                        </div>
+                        ${incident.dispatchedUnits.length > 0 ? `
+                            <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                Dispatched: ${incident.dispatchedUnits.map(unitId => `<span class="inline-block bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full mr-1">${unitId}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="flex justify-end space-x-2 mt-3">
+                            <button class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-xs hover:bg-gray-200 dark:hover:bg-gray-600 view-incident-btn" data-incident-id="${incident.id}">
+                                <i class="fas fa-eye mr-1"></i> View
+                            </button>
+                            <button class="px-3 py-1 bg-blue-500 text-white rounded-md text-xs hover:bg-blue-600 dispatch-incident-btn" data-incident-id="${incident.id}" ${incident.status !== 'Pending' ? 'disabled' : ''}>
+                                <i class="fas fa-paper-plane mr-1"></i> Dispatch
+                            </button>
+                            ${incident.status === 'Dispatched' ? `
+                                <button class="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 complete-incident-btn" data-incident-id="${incident.id}">
+                                    <i class="fas fa-check-circle mr-1"></i> Complete
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    activeIncidentsContainer.appendChild(incidentCard);
+                });
+            }
+        }
+
+        function updatePendingCallsUI(sortType = 'priority') {
+            let pendingCalls = state.incidents.filter(inc => inc.status === 'Pending');
+
+            if (sortType === 'priority') {
+                const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                pendingCalls.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority] || new Date(a.timestamp) - new Date(b.timestamp));
+            } else if (sortType === 'time') {
+                pendingCalls.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            }
+
+            pendingCallsContainer.innerHTML = '';
+            if (pendingCalls.length === 0) {
+                pendingCallsContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">No pending emergency calls</p>';
+                dispatchNextBtnDashboard.disabled = true;
+                dispatchNextBtnDispatch.disabled = true;
+            } else {
+                dispatchNextBtnDashboard.disabled = false;
+                dispatchNextBtnDispatch.disabled = false;
+
+                pendingCalls.forEach(incident => {
+                    const callCard = document.createElement('div');
+                    callCard.dataset.id = incident.id;
+                    callCard.classList.add('emergency-card', 'p-4', 'rounded-lg', 'shadow-sm', 'bg-gray-50', 'dark:bg-gray-800', 'dark:text-white', 'cursor-pointer', 'border', 'border-gray-200', 'dark:border-gray-700', getPriorityColorClass(incident.priority));
+                    if (state.selectedPendingCall && state.selectedPendingCall.id === incident.id) {
+                        callCard.classList.add('ring-2', 'ring-primary', 'dark:ring-blue-400');
+                    }
+                    callCard.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-md">${incident.type} - ${incident.location}</h3>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full ${incident.priority === 'critical' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : incident.priority === 'high' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'} capitalize">${incident.priority}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">${incident.description.substring(0, 100)}${incident.description.length > 100 ? '...' : ''}</p>
+                        <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>Caller: ${incident.callerName}</span>
+                            <span>Received: ${updateTimeAgo(incident.timestamp)}</span>
+                        </div>
+                    `;
+                    callCard.addEventListener('click', () => selectPendingCall(incident.id));
+                    pendingCallsContainer.appendChild(callCard);
+                });
+            }
+        }
+
+        function selectPendingCall(incidentId) {
+            state.selectedPendingCall = state.incidents.find(inc => inc.id === incidentId);
+            updatePendingCallsUI(currentSortType); // Re-render to highlight selected
+            updateDispatchPanel();
+            saveState();
+        }
+
+        function updateDispatchPanel() {
+            if (state.selectedPendingCall) {
+                selectedCallDetails.innerHTML = `
+                    <h3 class="text-md font-bold text-gray-900 dark:text-white mb-2">Incident #${state.selectedPendingCall.id.substring(0, 6)}</h3>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1"><strong>Type:</strong> ${state.selectedPendingCall.type}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1"><strong>Location:</strong> ${state.selectedPendingCall.location}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1"><strong>Priority:</strong> <span class="capitalize font-semibold">${state.selectedPendingCall.priority}</span></p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Description:</strong> ${state.selectedPendingCall.description}</p>
+                `;
+                dispatchForm.classList.remove('hidden');
+                populateAvailableUnits();
+            } else {
+                selectedCallDetails.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Select a call from "Pending Calls" to view details and dispatch units.</p>';
+                dispatchForm.classList.add('hidden');
+            }
+        }
+
+        function populateAvailableUnits() {
+            availableUnitsList.innerHTML = '';
+            const available = state.units.filter(unit => unit.status === 'Available');
+
+            if (available.length === 0) {
+                availableUnitsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">No units currently available.</p>';
+                return;
+            }
+
+            available.forEach(unit => {
+                const unitCheckbox = document.createElement('div');
+                unitCheckbox.classList.add('flex', 'items-center');
+                unitCheckbox.innerHTML = `
+                    <input type="checkbox" id="unit-${unit.id}" name="unitsToDispatch" value="${unit.id}" class="form-checkbox h-4 w-4 text-primary rounded">
+                    <label for="unit-${unit.id}" class="ml-2 text-sm text-gray-700 dark:text-gray-300">${unit.id} (${unit.type})</label>
+                `;
+                availableUnitsList.appendChild(unitCheckbox);
+            });
+        }
+
+        function updateUnitsTable() {
+            unitsTableBody.innerHTML = '';
+            if (state.units.length === 0) {
+                unitsTableBody.innerHTML = `
+                    <tr id="no-units-row">
+                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No units registered. Click "Add New Unit" to add one.</td>
+                    </tr>
+                `;
+            } else {
+                state.units.forEach(unit => {
+                    const row = document.createElement('tr');
+                    row.classList.add('hover:bg-gray-50', 'dark:hover:bg-gray-700');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${unit.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${unit.type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getUnitStatusColorClass(unit.status)}">${unit.status}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${unit.currentIncidentId ? `#${unit.currentIncidentId.substring(0,6)}` : 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${updateTimeAgo(unit.lastUpdate)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-primary hover:text-primary-dark mr-2 edit-unit-btn" data-unit-id="${unit.id}">Edit</button>
+                            <button class="text-red-600 hover:text-red-900 delete-unit-btn" data-unit-id="${unit.id}">Delete</button>
+                        </td>
+                    `;
+                    unitsTableBody.appendChild(row);
+                });
+            }
+            updateDashboardStats(); // Units status affects dashboard
+            populateUnitSelectForReports(); // Update units for reports dropdown
+        }
+
+        function updateRecentActivityUI() {
+            recentActivityContainer.innerHTML = '';
+            if (state.recentActivities.length === 0) {
+                recentActivityContainer.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 rounded-full p-2 text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">System initialized</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Dispatcher ready to receive calls</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Just now</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                state.recentActivities.forEach(activity => {
+                    const activityItem = document.createElement('div');
+                    activityItem.classList.add('flex', 'items-start');
+                    activityItem.innerHTML = `
+                        <div class="flex-shrink-0 ${activity.iconBgColor} rounded-full p-2 ${activity.iconClass.includes('red') ? 'text-red-600 dark:text-red-300' : activity.iconClass.includes('green') ? 'text-green-600 dark:text-green-300' : 'text-blue-600 dark:text-blue-300'}">
+                            <i class="${activity.iconClass}"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">${activity.title}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${activity.description}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${updateTimeAgo(activity.timestamp)}</p>
+                        </div>
+                    `;
+                    recentActivityContainer.appendChild(activityItem);
+                });
+            }
+        }
+
+        function populateUnitSelectForReports() {
+            unitSelectReport.innerHTML = '<option value="">All Units</option>';
+            state.units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = `${unit.id} (${unit.type})`;
+                unitSelectReport.appendChild(option);
+            });
+        }
+
+        function updateRecentReportsList() {
+            recentReportsList.innerHTML = '';
+            if (state.generatedReports.length === 0) {
+                recentReportsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">No reports generated yet.</p>';
+            } else {
+                state.generatedReports.forEach(report => {
+                    const reportItem = document.createElement('div');
+                    reportItem.classList.add('bg-gray-50', 'dark:bg-gray-800', 'p-3', 'rounded-md', 'flex', 'items-center', 'justify-between');
+                    reportItem.innerHTML = `
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">${report.type} Report</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${report.dateRange} - Generated ${updateTimeAgo(report.timestamp)}</p>
+                        </div>
+                        <button class="text-primary dark:text-blue-300 hover:underline text-sm view-report-btn" data-report-id="${report.id}">View</button>
+                    `;
+                    recentReportsList.appendChild(reportItem);
+                });
+            }
+        }
+
+        function updateDispatcherInfo() {
+            dispatcherNameElem.textContent = state.dispatcher.name;
+            dispatcherIdElem.textContent = state.dispatcher.id;
+            dispatcherNameSettingInput.value = state.dispatcher.name.replace(` ${state.dispatcher.id}`, '');
+            dispatcherIdSettingInput.value = state.dispatcher.id;
+        }
+
+        function updateSettingsUI() {
+            darkModeSettingToggle.checked = state.darkMode;
+            notifyNewCallCheckbox.checked = state.settings.notifyNewCall;
+            notifyHighPriorityCheckbox.checked = state.settings.notifyHighPriority;
+            notifyUnitStatusCheckbox.checked = state.settings.notifyUnitStatus;
+            pendingCallThresholdInput.value = state.settings.pendingCallThreshold;
+            lowUnitThresholdInput.value = state.settings.lowUnitThreshold;
+        }
+
+        // Event Handlers
+
+        // Dark Mode Toggle
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        darkModeSettingToggle.addEventListener('change', toggleDarkMode);
+
+        // Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                showPage(`${link.dataset.page}-page`);
+            });
+        });
+
+        // Notifications Dropdown
+        notificationsBtn.addEventListener('click', () => {
+            notificationsDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (event) => {
+            if (!notificationsBtn.contains(event.target) && !notificationsDropdown.contains(event.target)) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        });
+
+        // Dismiss Alert Banner
+        dismissAlertBtn.addEventListener('click', () => {
+            alertBanner.classList.add('hidden');
+            alertBanner.classList.remove('blink');
+        });
+
+        // Dashboard "New Call" button
+        newCallBtnDashboard.addEventListener('click', () => {
+            showPage('dispatch-page');
+            state.selectedPendingCall = null; // Clear selected call
+            updateDispatchPanel();
+            newCallForm.reset(); // Clear form
+        });
+
+        // Dashboard "Dispatch Next Priority" button
+        dispatchNextBtnDashboard.addEventListener('click', () => {
+            const pendingCalls = state.incidents.filter(inc => inc.status === 'Pending');
+            if (pendingCalls.length > 0) {
+                // Sort by priority (critical > high > medium > low), then by time
+                const sortedCalls = [...pendingCalls].sort((a, b) => {
+                    const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority] || new Date(a.timestamp) - new Date(b.timestamp);
+                });
+                selectPendingCall(sortedCalls[0].id);
+                showPage('dispatch-page');
+            }
+        });
+
+        // Broadcast Alert Button
+        broadcastBtn.addEventListener('click', () => {
+            broadcastModal.classList.remove('hidden');
+        });
+        cancelBroadcastBtn.addEventListener('click', () => {
+            broadcastModal.classList.add('hidden');
+            broadcastMessageInput.value = '';
+        });
+        sendBroadcastBtn.addEventListener('click', () => {
+            const message = broadcastMessageInput.value.trim();
+            if (message) {
+                addNotification(`Broadcast: ${message}`, 'warning');
+                addActivity('Broadcast Alert', message, 'fas fa-bullhorn', 'bg-purple-100 dark:bg-purple-900');
+                alert(`Broadcast sent: "${message}"`); // Simulate sending broadcast
+                broadcastModal.classList.add('hidden');
+                broadcastMessageInput.value = '';
+            } else {
+                alert('Please enter a broadcast message.');
+            }
+        });
+
+        // Emergency Panic Button
+        panicBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to trigger an Emergency Panic Alert? This will alert all units!')) {
+                addNotification('Emergency Panic Alert Triggered! All units notified.', 'critical');
+                addActivity('Emergency Panic', 'A system-wide panic alert has been triggered.', 'fas fa-exclamation-triangle', 'bg-red-100 dark:bg-red-900');
+                alert('EMERGENCY PANIC ALERT ACTIVATED!'); // Simulate activation
+            }
+        });
+
+        // Refresh Activity
+        refreshActivityBtn.addEventListener('click', updateRecentActivityUI);
+
+
+        // New Call Form Submission
+        newCallForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const callerName = document.getElementById('caller-name').value;
+            const callerPhone = document.getElementById('caller-phone').value;
+            const emergencyType = document.getElementById('emergency-type').value;
+            const location = document.getElementById('location').value;
+            const priority = document.getElementById('priority').value;
+            const description = document.getElementById('description').value;
+
+            const newIncident = {
+                id: `INC-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+                callerName,
+                callerPhone,
+                type: emergencyType,
+                location,
+                priority,
+                description,
+                status: 'Pending',
+                timestamp: new Date().toISOString(),
+                dispatchedUnits: []
+            };
+
+            state.incidents.unshift(newIncident); // Add to beginning for easier display
+            newCallForm.reset();
+            updateDashboardStats();
+            updateActiveIncidentsUI();
+            updatePendingCallsUI(currentSortType);
+            addActivity('New Call Received', `Type: ${emergencyType}, Location: ${location}, Priority: ${priority}`, 'fas fa-phone-volume', 'bg-blue-100 dark:bg-blue-900');
+
+            if (state.settings.notifyNewCall) {
+                addNotification(`New Call: ${emergencyType} at ${location} (${priority.toUpperCase()})`);
+            }
+            if (state.settings.notifyHighPriority && (priority === 'high' || priority === 'critical')) {
+                addNotification(`HIGH PRIORITY: ${emergencyType} at ${location}`, 'critical');
+            }
+
+            // Automatically select the new call if it's the highest priority or first pending
+            const highestPriorityPending = state.incidents.filter(inc => inc.status === 'Pending').sort((a, b) => {
+                const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                return priorityOrder[b.priority] - priorityOrder[a.priority] || new Date(a.timestamp) - new Date(b.timestamp);
+            })[0];
+
+            if (highestPriorityPending && highestPriorityPending.id === newIncident.id) {
+                selectPendingCall(newIncident.id);
+            } else if (!state.selectedPendingCall) { // If nothing was selected, select this one
+                selectPendingCall(newIncident.id);
+            }
+            saveState();
+        });
+
+        // Sort Pending Calls
+        let currentSortType = 'priority';
+        sortPriorityBtn.addEventListener('click', () => {
+            currentSortType = 'priority';
+            updatePendingCallsUI(currentSortType);
+            sortPriorityBtn.classList.add('bg-gray-200', 'dark:bg-gray-600');
+            sortTimeBtn.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+        });
+        sortTimeBtn.addEventListener('click', () => {
+            currentSortType = 'time';
+            updatePendingCallsUI(currentSortType);
+            sortTimeBtn.classList.add('bg-gray-200', 'dark:bg-gray-600');
+            sortPriorityBtn.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+        });
+
+        // Dispatch Next Button (on Dispatch page)
+        dispatchNextBtnDispatch.addEventListener('click', () => {
+            const pendingCalls = state.incidents.filter(inc => inc.status === 'Pending');
+            if (pendingCalls.length > 0) {
+                const sortedCalls = [...pendingCalls].sort((a, b) => {
+                    const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority] || new Date(a.timestamp) - new Date(b.timestamp);
+                });
+                selectPendingCall(sortedCalls[0].id);
+            }
+        });
+
+        // Dispatch Form Submission
+        dispatchForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!state.selectedPendingCall) {
+                alert('Please select a call to dispatch.');
+                return;
+            }
+
+            const selectedUnits = Array.from(document.querySelectorAll('input[name="unitsToDispatch"]:checked'))
+                                     .map(checkbox => checkbox.value);
+            const dispatchNotes = dispatchNotesInput.value.trim();
+
+            if (selectedUnits.length === 0) {
+                alert('Please select at least one unit to dispatch.');
+                return;
+            }
+
+            const incident = state.incidents.find(inc => inc.id === state.selectedPendingCall.id);
+            if (incident) {
+                incident.status = 'Dispatched';
+                incident.dispatchedUnits = selectedUnits;
+                incident.dispatchTime = new Date().toISOString();
+                incident.dispatchNotes = dispatchNotes;
+
+                selectedUnits.forEach(unitId => {
+                    const unit = state.units.find(u => u.id === unitId);
+                    if (unit) {
+                        unit.status = 'Dispatched';
+                        unit.currentIncidentId = incident.id;
+                        unit.lastUpdate = new Date().toISOString();
+                        addActivity('Unit Status Update', `${unit.id} dispatched to incident #${incident.id.substring(0,6)}.`, 'fas fa-car-side', 'bg-yellow-100 dark:bg-yellow-900');
+                        if (state.settings.notifyUnitStatus) {
+                            addNotification(`Unit ${unit.id} dispatched to ${incident.location} (${incident.type})`);
+                        }
+                    }
+                });
+
+                addActivity('Incident Dispatched', `Incident #${incident.id.substring(0,6)} (${incident.type}) dispatched to ${incident.location} with units: ${selectedUnits.join(', ')}.`, 'fas fa-paper-plane', 'bg-green-100 dark:bg-green-900');
+                addNotification(`Incident #${incident.id.substring(0,6)} dispatched to ${incident.location}`, 'success');
+                alert(`Incident #${incident.id.substring(0,6)} dispatched!`);
+
+                state.selectedPendingCall = null; // Clear selection
+                dispatchForm.reset();
+                updateDashboardStats();
+                updateActiveIncidentsUI();
+                updatePendingCallsUI(currentSortType);
+                updateDispatchPanel(); // Reset dispatch panel
+                updateUnitsTable(); // Update unit statuses in table
+            }
+            saveState();
+        });
+
+        cancelDispatchBtn.addEventListener('click', () => {
+            state.selectedPendingCall = null;
+            dispatchForm.reset();
+            updateDispatchPanel(); // Reset dispatch panel
+            saveState();
+        });
+
+        // Dynamic Incident Buttons (View, Dispatch, Complete)
+        activeIncidentsContainer.addEventListener('click', (event) => {
+            const incidentId = event.target.dataset.incidentId;
+            if (!incidentId) return;
+
+            const incident = state.incidents.find(inc => inc.id === incidentId);
+            if (!incident) return;
+
+            if (event.target.classList.contains('view-incident-btn')) {
+                // For now, just set as selected in dispatch panel and switch page
+                selectPendingCall(incident.id);
+                showPage('dispatch-page');
+            } else if (event.target.classList.contains('dispatch-incident-btn')) {
+                 selectPendingCall(incident.id);
+                 showPage('dispatch-page');
+            } else if (event.target.classList.contains('complete-incident-btn')) {
+                if (confirm(`Mark incident #${incident.id.substring(0,6)} as completed?`)) {
+                    incident.status = 'Completed';
+                    incident.completionTime = new Date().toISOString();
+
+                    incident.dispatchedUnits.forEach(unitId => {
+                        const unit = state.units.find(u => u.id === unitId);
+                        if (unit && unit.currentIncidentId === incident.id) {
+                            unit.status = 'Available'; // Or 'Returning' if more complex workflow
+                            unit.currentIncidentId = null;
+                            unit.lastUpdate = new Date().toISOString();
+                            addActivity('Unit Status Update', `${unit.id} is now available after completing incident #${incident.id.substring(0,6)}.`, 'fas fa-check-circle', 'bg-green-100 dark:bg-green-900');
+                            if (state.settings.notifyUnitStatus) {
+                                addNotification(`Unit ${unit.id} is now available.`);
+                            }
+                        }
+                    });
+
+                    addActivity('Incident Completed', `Incident #${incident.id.substring(0,6)} (${incident.type}) at ${incident.location} completed.`, 'fas fa-clipboard-check', 'bg-blue-100 dark:bg-blue-900');
+                    addNotification(`Incident #${incident.id.substring(0,6)} completed.`, 'info');
+
+                    updateDashboardStats();
+                    updateActiveIncidentsUI();
+                    updateUnitsTable();
+                    saveState();
+                }
+            }
+        });
+
+
+        // Add Unit Modal
+        addUnitBtn.addEventListener('click', () => {
+            addUnitModal.classList.remove('hidden');
+            addUnitForm.reset();
+        });
+        cancelAddUnitBtn.addEventListener('click', () => {
+            addUnitModal.classList.add('hidden');
+        });
+        addUnitForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const unitId = unitIdInput.value.trim();
+            const unitType = unitTypeInput.value;
+            const unitStatus = unitStatusInput.value;
+
+            if (state.units.some(unit => unit.id.toLowerCase() === unitId.toLowerCase())) {
+                alert('A unit with this ID already exists. Please use a unique ID.');
+                return;
+            }
+
+            const newUnit = {
+                id: unitId,
+                type: unitType,
+                status: unitStatus,
+                currentIncidentId: null,
+                lastUpdate: new Date().toISOString(),
+                location: 'Metro Base' // Placeholder for location
+            };
+
+            state.units.push(newUnit);
+            addActivity('New Unit Added', `Unit ${unitId} (${unitType}) added with status: ${unitStatus}.`, 'fas fa-truck-medical', 'bg-blue-100 dark:bg-blue-900');
+            addNotification(`New unit ${unitId} (${unitType}) added.`, 'info');
+            addUnitModal.classList.add('hidden');
+            updateUnitsTable();
+            saveState();
+        });
+
+        // Units Table Actions (Edit/Delete) - Event Delegation
+        unitsTableBody.addEventListener('click', (event) => {
+            const unitId = event.target.dataset.unitId;
+            if (!unitId) return;
+
+            if (event.target.classList.contains('delete-unit-btn')) {
+                if (confirm(`Are you sure you want to delete unit ${unitId}? This action cannot be undone.`)) {
+                    state.units = state.units.filter(unit => unit.id !== unitId);
+                    addActivity('Unit Removed', `Unit ${unitId} has been removed from the system.`, 'fas fa-trash-alt', 'bg-red-100 dark:bg-red-900');
+                    addNotification(`Unit ${unitId} removed.`, 'warning');
+                    updateUnitsTable();
+                    saveState();
+                }
+            } else if (event.target.classList.contains('edit-unit-btn')) {
+                // For a single HTML file, a simpler in-line edit or prompt can be used, or a dedicated "edit unit" modal.
+                // For this example, let's just alert the current status and allow changing it via prompt.
+                const unitToEdit = state.units.find(unit => unit.id === unitId);
+                if (unitToEdit) {
+                    const newStatus = prompt(`Enter new status for ${unitId} (Available, Dispatched, On Scene, Returning, Offline):`, unitToEdit.status);
+                    if (newStatus && ['Available', 'Dispatched', 'On Scene', 'Returning', 'Offline'].includes(newStatus)) {
+                        unitToEdit.status = newStatus;
+                        unitToEdit.lastUpdate = new Date().toISOString();
+                        addActivity('Unit Status Edited', `Unit ${unitId} status updated to: ${newStatus}.`, 'fas fa-edit', 'bg-gray-100 dark:bg-gray-700');
+                        addNotification(`Unit ${unitId} status changed to ${newStatus}.`, 'info');
+                        updateUnitsTable();
+                        saveState();
+                    } else if (newStatus !== null) {
+                        alert('Invalid status. Please choose from: Available, Dispatched, On Scene, Returning, Offline.');
+                    }
+                }
+            }
+        });
+
+
+        // Reports Form Submission
+        reportForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const reportType = document.getElementById('report-type').value;
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const selectedUnit = document.getElementById('unit-select-report').value;
+
+            if (!reportType) {
+                alert('Please select a report type.');
+                return;
+            }
+
+            let reportText = '';
+            let filteredIncidents = [];
+            let filteredUnits = [];
+            let reportTitle = '';
+            let dateRange = '';
+
+            const startMs = startDate ? new Date(startDate).getTime() : 0;
+            const endMs = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : Infinity;
+
+            if (startDate && endDate) {
+                dateRange = `${startDate} to ${endDate}`;
+            } else if (startDate) {
+                dateRange = `From ${startDate}`;
+            } else if (endDate) {
+                dateRange = `Up to ${endDate}`;
+            } else {
+                dateRange = `All time`;
+            }
+
+            filteredIncidents = state.incidents.filter(inc => {
+                const incTime = new Date(inc.timestamp).getTime();
+                return incTime >= startMs && incTime <= endMs;
+            });
+
+            filteredUnits = state.units.filter(unit => {
+                if (selectedUnit && unit.id !== selectedUnit) return false;
+                const unitTime = new Date(unit.lastUpdate).getTime(); // Using lastUpdate as a filter point
+                return unitTime >= startMs && unitTime <= endMs;
+            });
+
+
+            switch (reportType) {
+                case 'daily':
+                case 'weekly':
+                case 'monthly':
+                    reportTitle = `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Summary Report`;
+                    const totalCalls = filteredIncidents.length;
+                    const dispatchedCalls = filteredIncidents.filter(inc => inc.status === 'Dispatched' || inc.status === 'Completed').length;
+                    const pendingCalls = filteredIncidents.filter(inc => inc.status === 'Pending').length;
+                    const criticalCalls = filteredIncidents.filter(inc => inc.priority === 'critical').length;
+
+                    reportText = `
+                        <p><strong>Report Period:</strong> ${dateRange}</p>
+                        <p><strong>Total Calls Received:</strong> ${totalCalls}</p>
+                        <p><strong>Calls Dispatched:</strong> ${dispatchedCalls}</p>
+                        <p><strong>Calls Still Pending:</strong> ${pendingCalls}</p>
+                        <p><strong>Critical Priority Calls:</strong> ${criticalCalls}</p>
+                        <h4 class="font-semibold mt-3">Breakdown by Emergency Type:</h4>
+                        <ul class="list-disc list-inside ml-4">
+                            ${Object.entries(filteredIncidents.reduce((acc, inc) => {
+                                acc[inc.type] = (acc[inc.type] || 0) + 1;
+                                return acc;
+                            }, {})).map(([type, count]) => `<li>${type}: ${count}</li>`).join('')}
+                        </ul>
+                        <h4 class="font-semibold mt-3">Breakdown by Status:</h4>
+                        <ul class="list-disc list-inside ml-4">
+                            ${Object.entries(filteredIncidents.reduce((acc, inc) => {
+                                acc[inc.status] = (acc[inc.status] || 0) + 1;
+                                return acc;
+                            }, {})).map(([status, count]) => `<li>${status}: ${count}</li>`).join('')}
+                        </ul>
+                    `;
+                    break;
+                case 'unit_activity':
+                    reportTitle = `Unit Activity Log Report for ${selectedUnit || 'All Units'}`;
+                    reportText = `
+                        <p><strong>Report Period:</strong> ${dateRange}</p>
+                        <p><strong>Selected Unit:</strong> ${selectedUnit || 'All Units'}</p>
+                        <h4 class="font-semibold mt-3">Unit Status Over Time:</h4>
+                        <ul class="list-disc list-inside ml-4">
+                            ${filteredUnits.map(unit => `<li><strong>${unit.id} (${unit.type}):</strong> Current Status: ${unit.status}, Last Update: ${formatTimestamp(unit.lastUpdate)}</li>`).join('')}
+                        </ul>
+                        <h4 class="font-semibold mt-3">Incidents Dispatched by Unit(s):</h4>
+                        <ul class="list-disc list-inside ml-4">
+                            ${filteredIncidents.filter(inc => inc.dispatchedUnits.length > 0 && (!selectedUnit || inc.dispatchedUnits.includes(selectedUnit)))
+                                .map(inc => `<li>Incident #${inc.id.substring(0,6)} (${inc.type}) at ${inc.location} - Dispatched: ${inc.dispatchedUnits.join(', ')}</li>`).join('') || '<li>No incidents dispatched in this period for the selected unit(s).</li>'}
+                        </ul>
+                    `;
+                    break;
+                default:
+                    reportText = '<p>No report generated for this type.</p>';
+                    break;
+            }
+
+            reportContent.innerHTML = reportText;
+            generatedReportView.classList.remove('hidden');
+
+            // Save generated report to state
+            const newReport = {
+                id: `REP-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+                type: reportType,
+                dateRange: dateRange,
+                timestamp: new Date().toISOString(),
+                content: reportText // Store the HTML content for display
+            };
+            state.generatedReports.unshift(newReport);
+            addActivity('Report Generated', `${reportType} report generated for ${dateRange}.`, 'fas fa-chart-bar', 'bg-blue-100 dark:bg-blue-900');
+            updateRecentReportsList();
+            saveState();
+        });
+
+        // View Recent Report
+        recentReportsList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('view-report-btn')) {
+                const reportId = event.target.dataset.reportId;
+                const report = state.generatedReports.find(r => r.id === reportId);
+                if (report) {
+                    reportContent.innerHTML = report.content;
+                    generatedReportView.classList.remove('hidden');
+                    // Optionally scroll to report view
+                    generatedReportView.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+
+        // Settings Page Save
+        saveSettingsBtn.addEventListener('click', () => {
+            state.settings.notifyNewCall = notifyNewCallCheckbox.checked;
+            state.settings.notifyHighPriority = notifyHighPriorityCheckbox.checked;
+            state.settings.notifyUnitStatus = notifyUnitStatusCheckbox.checked;
+            state.settings.pendingCallThreshold = parseInt(pendingCallThresholdInput.value, 10);
+            state.settings.lowUnitThreshold = parseInt(lowUnitThresholdInput.value, 10);
+
+            const newDispatcherName = dispatcherNameSettingInput.value.trim();
+            if (newDispatcherName && newDispatcherName !== state.dispatcher.name.replace(` ${state.dispatcher.id}`, '')) {
+                state.dispatcher.name = `${newDispatcherName} ${state.dispatcher.id}`;
+            }
+
+            updateDispatcherInfo();
+            addNotification('Settings saved successfully.', 'success');
+            addActivity('Settings Updated', 'Application settings have been updated.', 'fas fa-cog', 'bg-gray-100 dark:bg-gray-700');
+            saveState();
+            alert('Settings saved!');
+        });
+
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState(); // Load state first
+            if (state.darkMode) {
+                document.documentElement.classList.add('dark');
+            }
+            darkModeSettingToggle.checked = state.darkMode; // Sync checkbox with state
+            updateDispatcherInfo();
+            updateDashboardStats();
+            updateNotificationsUI();
+            updateActiveIncidentsUI();
+            updatePendingCallsUI(currentSortType);
+            updateDispatchPanel();
+            updateUnitsTable();
+            updateRecentActivityUI();
+            populateUnitSelectForReports();
+            updateRecentReportsList();
+            updateSettingsUI();
+
+            // Initial page display
+            showPage('dashboard-page');
+        });
+
+        // Periodic UI updates (e.g., "time ago" timestamps)
+        setInterval(() => {
+            updateNotificationsUI();
+            updateActiveIncidentsUI();
+            updatePendingCallsUI(currentSortType);
+            updateUnitsTable(); // To update 'last update' times
+            lastSyncElem.textContent = updateTimeAgo(new Date().toISOString());
+        }, 60000); // Every minute
+
+    </script>
+</body>
+</html>

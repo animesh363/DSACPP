@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Call Dispatcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#e11d48',
+                        secondary: '#1e40af',
+                        dark: '#0f172a',
+                        light: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .emergency-card {
+            transition: all 0.3s ease;
+        }
+        .emergency-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .priority-fire {
+            border-left: 4px solid #ef4444;
+        }
+        .priority-medical {
+            border-left: 4px solid #3b82f6;
+        }
+        .priority-theft {
+            border-left: 4px solid #f59e0b;
+        }
+        .map-container {
+            height: 300px;
+            background-color: #e5e7eb;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNlNWU3ZWIiLz48cGF0aCBkPSJNMCAwSDYwVjYwSDAiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgMTVjLTguMjg0IDAtMTUgNi43MTYtMTUgMTVzNi43MTYgMTUgMTUgMTUgMTUtNi43MTYgMTUtMTUtNi43MTYtMTUtMTUtMTVtMC0xNUM0Mi40MzEgMCA1MiA5LjU2OSA1MiAyMXMtOS41NjkgMjEtMjEgMjFTMTAgMzIuNDMxIDEwIDIxIDE5LjU2OSAwIDMwIDAiIGZpbGw9IiNjY2MiIG9wYWNpdHk9Ii4yNSIvPjwvc3ZnPg==');
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-primary">Emergency Dispatch System</h1>
+                    <p class="text-gray-600">Priority-based call management</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Active Dispatcher</p>
+                        <p class="font-medium">Officer <span id="dispatcher-id">#ED-${Math.floor(1000 + Math.random() * 9000)}</span></p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Call Management -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Received Calls</p>
+                                <h3 class="text-2xl font-bold" id="received-count">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-phone-volume"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Dispatched</p>
+                                <h3 class="text-2xl font-bold" id="dispatched-count">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <i class="fas fa-ambulance"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Pending</p>
+                                <h3 class="text-2xl font-bold" id="pending-count">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Call Form -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary">Receive New Emergency Call</h2>
+                    <form id="new-call-form" class="space-y-4">
+                        <div>
+                            <label for="caller-name" class="block text-sm font-medium text-gray-700">Caller Name</label>
+                            <input type="text" id="caller-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                        </div>
+                        <div>
+                            <label for="caller-phone" class="block text-sm font-medium text-gray-700">Caller Phone</label>
+                            <input type="tel" id="caller-phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                        </div>
+                        <div>
+                            <label for="emergency-type" class="block text-sm font-medium text-gray-700">Emergency Type</label>
+                            <select id="emergency-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                <option value="">Select emergency type</option>
+                                <option value="1">Theft/Robbery</option>
+                                <option value="2">Medical Emergency</option>
+                                <option value="3">Fire Incident</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                            <input type="text" id="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                        </div>
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="reset" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                Clear
+                            </button>
+                            <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                <i class="fas fa-phone-alt mr-2"></i> Receive Call
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Pending Calls -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-primary">Pending Calls</h2>
+                        <button id="dispatch-next-btn" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-paper-plane mr-1"></i> Dispatch Next
+                        </button>
+                    </div>
+                    <div id="pending-calls-container" class="space-y-3">
+                        <p class="text-gray-500 text-center py-4">No pending emergency calls</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Dispatch Panel -->
+            <div class="space-y-6">
+                <!-- Dispatch Panel -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary">Dispatch Panel</h2>
+                    <div id="dispatch-details" class="hidden">
+                        <div class="mb-4">
+                            <h3 class="font-medium text-gray-900">Case Details</h3>
+                            <div class="mt-2 space-y-2">
+                                <p><span class="font-medium">Case ID:</span> <span id="dispatch-case-id"></span></p>
+                                <p><span class="font-medium">Caller:</span> <span id="dispatch-caller"></span></p>
+                                <p><span class="font-medium">Emergency:</span> <span id="dispatch-type"></span></p>
+                                <p><span class="font-medium">Location:</span> <span id="dispatch-location"></span></p>
+                                <p><span class="font-medium">Received:</span> <span id="dispatch-time"></span></p>
+                            </div>
+                        </div>
+                        <div class="map-container rounded-md mb-4 flex items-center justify-center">
+                            <p class="text-gray-500">Location map would appear here</p>
+                        </div>
+                        <div class="mb-4">
+                            <label for="dispatch-notes" class="block text-sm font-medium text-gray-700">Dispatch Notes</label>
+                            <textarea id="dispatch-notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button id="cancel-dispatch-btn" class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                Cancel
+                            </button>
+                            <button id="confirm-dispatch-btn" class="px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <i class="fas fa-check mr-1"></i> Confirm Dispatch
+                            </button>
+                        </div>
+                    </div>
+                    <div id="no-dispatch" class="text-center py-8">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-2"></i>
+                        <p class="text-gray-500">No call selected for dispatch</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary">Quick Actions</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="view-logs-btn" class="px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i class="fas fa-list-alt mr-1"></i> View Logs
+                        </button>
+                        <button id="search-case-btn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            <i class="fas fa-search mr-1"></i> Search Case
+                        </button>
+                        <button id="stats-btn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            <i class="fas fa-chart-bar mr-1"></i> Statistics
+                        </button>
+                        <button id="clear-logs-btn" class="px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i class="fas fa-trash-alt mr-1"></i> Clear Logs
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-primary">Recent Activity</h2>
+                    <div id="recent-activity" class="space-y-3">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-full p-2 text-blue-600">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">System initialized</p>
+                                <p class="text-sm text-gray-500">Dispatcher ready to receive calls</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Call Logs Modal -->
+    <div id="logs-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-primary">Emergency Call Logs</h3>
+            </div>
+            <div class="p-6 overflow-auto max-h-[60vh]">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Caller</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Logs will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="close-logs-modal" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Case Modal -->
+    <div id="search-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-primary">Search Case by ID</h3>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="search-case-id" class="block text-sm font-medium text-gray-700">Case ID</label>
+                    <input type="text" id="search-case-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="Enter case ID">
+                </div>
+                <div id="search-result" class="hidden mt-4 p-4 bg-gray-50 rounded-md">
+                    <h4 class="font-medium text-gray-900">Case Details</h4>
+                    <div id="case-details" class="mt-2 space-y-1 text-sm">
+                        <!-- Case details will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between">
+                <button id="close-search-modal" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Cancel
+                </button>
+                <button id="perform-search-btn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-primary">System Statistics</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium text-gray-900">Call Metrics</h4>
+                        <div class="mt-2 grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 p-3 rounded-md">
+                                <p class="text-sm text-blue-800">Received</p>
+                                <p class="text-xl font-bold" id="stats-received">0</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-md">
+                                <p class="text-sm text-green-800">Dispatched</p>
+                                <p class="text-xl font-bold" id="stats-dispatched">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900">Call Types</h4>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm">Fire Incidents</span>
+                                <span class="text-sm font-medium" id="stats-fire">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Medical Emergencies</span>
+                                <span class="text-sm font-medium" id="stats-medical">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Theft/Robbery</span>
+                                <span class="text-sm font-medium" id="stats-theft">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900">System Info</h4>
+                        <div class="mt-2 space-y-1 text-sm">
+                            <p>Dispatcher: <span id="stats-dispatcher">Officer #ED-1234</span></p>
+                            <p>Last Case ID: <span id="stats-last-id">1000</span></p>
+                            <p>System Version: 1.0.0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="close-stats-modal" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Logs Confirmation Modal -->
+    <div id="clear-logs-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-primary">Confirm Clear Logs</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 pt-0.5">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-gray-700">Are you sure you want to clear all call logs? This action cannot be undone.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between">
+                <button id="cancel-clear-logs" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Cancel
+                </button>
+                <button id="confirm-clear-logs" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Clear Logs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg transform translate-y-10 opacity-0 transition-all duration-300 flex items-start z-50 max-w-xs">
+        <div class="flex-shrink-0 pt-0.5 mr-2">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+            <p id="toast-message" class="text-sm"></p>
+        </div>
+        <button id="close-toast" class="ml-4 text-white hover:text-gray-200">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        // Emergency Types
+        const EmergencyType = {
+            THEFT: 1,
+            MEDICAL: 2,
+            FIRE: 3
+        };
+
+        // Get emergency type name
+        function getEmergencyType(type) {
+            switch (type) {
+                case EmergencyType.FIRE: return "Fire Incident";
+                case EmergencyType.MEDICAL: return "Medical Emergency";
+                case EmergencyType.THEFT: return "Theft/Robbery";
+                default: return "Unknown";
+            }
+        }
+
+        // Get emergency type color
+        function getEmergencyTypeColor(type) {
+            switch (type) {
+                case EmergencyType.FIRE: return "bg-red-100 text-red-800";
+                case EmergencyType.MEDICAL: return "bg-blue-100 text-blue-800";
+                case EmergencyType.THEFT: return "bg-yellow-100 text-yellow-800";
+                default: return "bg-gray-100 text-gray-800";
+            }
+        }
+
+        // Get emergency priority class
+        function getEmergencyPriorityClass(type) {
+            switch (type) {
+                case EmergencyType.FIRE: return "priority-fire";
+                case EmergencyType.MEDICAL: return "priority-medical";
+                case EmergencyType.THEFT: return "priority-theft";
+                default: return "";
+            }
+        }
+
+        // Emergency Call class
+        class EmergencyCall {
+            constructor(caseID, callerName, callerPhone, type, location, description, timeReceived, status = "RECEIVED") {
+                this.caseID = caseID;
+                this.callerName = callerName;
+                this.callerPhone = callerPhone;
+                this.type = type;
+                this.location = location;
+                this.description = description;
+                this.timeReceived = timeReceived;
+                this.status = status;
+            }
+
+            // Compare function for priority queue
+            compareTo(other) {
+                // Higher priority comes first
+                if (this.type !== other.type) {
+                    return other.type - this.type; // Fire (3) has highest priority
+                }
+                // If same type, earlier time comes first
+                return new Date(this.timeReceived) - new Date(other.timeReceived);
+            }
+        }
+
+        // Priority Queue implementation
+        class PriorityQueue {
+            constructor() {
+                this.heap = [];
+            }
+
+            enqueue(item) {
+                this.heap.push(item);
+                this.bubbleUp(this.heap.length - 1);
+            }
+
+            dequeue() {
+                if (this.isEmpty()) return null;
+                const root = this.heap[0];
+                const last = this.heap.pop();
+                if (this.heap.length > 0) {
+                    this.heap[0] = last;
+                    this.bubbleDown(0);
+                }
+                return root;
+            }
+
+            peek() {
+                return this.isEmpty() ? null : this.heap[0];
+            }
+
+            isEmpty() {
+                return this.heap.length === 0;
+            }
+
+            size() {
+                return this.heap.length;
+            }
+
+            bubbleUp(index) {
+                while (index > 0) {
+                    const parentIndex = Math.floor((index - 1) / 2);
+                    if (this.heap[parentIndex].compareTo(this.heap[index]) <= 0) break;
+                    [this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]];
+                    index = parentIndex;
+                }
+            }
+
+            bubbleDown(index) {
+                while (true) {
+                    const leftChild = 2 * index + 1;
+                    const rightChild = 2 * index + 2;
+                    let smallest = index;
+
+                    if (leftChild < this.heap.length && 
+                        this.heap[leftChild].compareTo(this.heap[smallest]) < 0) {
+                        smallest = leftChild;
+                    }
+
+                    if (rightChild < this.heap.length && 
+                        this.heap[rightChild].compareTo(this.heap[smallest]) < 0) {
+                        smallest = rightChild;
+                    }
+
+                    if (smallest === index) break;
+                    [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+                    index = smallest;
+                }
+            }
+
+            toArray() {
+                return [...this.heap].sort((a, b) => a.compareTo(b));
+            }
+        }
+
+        // Emergency Dispatch System
+        class EmergencyDispatchSystem {
+            constructor() {
+                this.callQueue = new PriorityQueue();
+                this.callHistory = [];
+                this.currentCaseID = 1001;
+                this.receivedCount = 0;
+                this.dispatchedCount = 0;
+                this.fireCount = 0;
+                this.medicalCount = 0;
+                this.theftCount = 0;
+                this.loadFromLocalStorage();
+                this.updateUI();
+            }
+
+            // Load data from localStorage
+            loadFromLocalStorage() {
+                const savedData = localStorage.getItem('emergencyDispatchSystem');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.currentCaseID = data.currentCaseID || 1001;
+                    this.receivedCount = data.receivedCount || 0;
+                    this.dispatchedCount = data.dispatchedCount || 0;
+                    this.fireCount = data.fireCount || 0;
+                    this.medicalCount = data.medicalCount || 0;
+                    this.theftCount = data.theftCount || 0;
+                    
+                    // Restore call history
+                    if (data.callHistory && data.callHistory.length > 0) {
+                        this.callHistory = data.callHistory.map(call => new EmergencyCall(
+                            call.caseID,
+                            call.callerName,
+                            call.callerPhone,
+                            call.type,
+                            call.location,
+                            call.description,
+                            call.timeReceived,
+                            call.status
+                        ));
+                    }
+                    
+                    // Restore pending calls
+                    if (data.pendingCalls && data.pendingCalls.length > 0) {
+                        data.pendingCalls.forEach(call => {
+                            this.callQueue.enqueue(new EmergencyCall(
+                                call.caseID,
+                                call.callerName,
+                                call.callerPhone,
+                                call.type,
+                                call.location,
+                                call.description,
+                                call.timeReceived,
+                                call.status
+                            ));
+                        });
+                    }
+                }
+            }
+
+            // Save data to localStorage
+            saveToLocalStorage() {
+                const data = {
+                    currentCaseID: this.currentCaseID,
+                    receivedCount: this.receivedCount,
+                    dispatchedCount: this.dispatchedCount,
+                    fireCount: this.fireCount,
+                    medicalCount: this.medicalCount,
+                    theftCount: this.theftCount,
+                    callHistory: this.callHistory,
+                    pendingCalls: this.callQueue.toArray()
+                };
+                localStorage.setItem('emergencyDispatchSystem', JSON.stringify(data));
+            }
+
+            // Receive a new emergency call
+            receiveCall(callerName, callerPhone, type, location, description) {
+                const now = new Date();
+                const timeReceived = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateReceived = now.toLocaleDateString();
+                
+                const call = new EmergencyCall(
+                    this.currentCaseID++,
+                    callerName,
+                    callerPhone,
+                    parseInt(type),
+                    location,
+                    description,
+                    `${dateReceived} ${timeReceived}`
+                );
+                
+                this.callQueue.enqueue(call);
+                this.callHistory.push(call);
+                this.receivedCount++;
+                
+                // Update type counts
+                switch (parseInt(type)) {
+                    case EmergencyType.FIRE: this.fireCount++; break;
+                    case EmergencyType.MEDICAL: this.medicalCount++; break;
+                    case EmergencyType.THEFT: this.theftCount++; break;
+                }
+                
+                this.saveToLocalStorage();
+                this.updateUI();
+                this.addActivity(`New call received: ${getEmergencyType(call.type)} at ${call.location}`);
+                
+                return call;
+            }
+
+            // Dispatch the highest priority call
+            dispatchCall() {
+                if (this.callQueue.isEmpty()) {
+                    this.showNotification("No pending calls to dispatch", "error");
+                    return null;
+                }
+                
+                const call = this.callQueue.dequeue();
+                call.status = "DISPATCHED";
+                this.dispatchedCount++;
+                this.saveToLocalStorage();
+                this.updateUI();
+                this.addActivity(`Call #${call.caseID} dispatched to ${call.location}`);
+                
+                return call;
+            }
+
+            // Get all call logs
+            getCallLogs() {
+                return [...this.callHistory].sort((a, b) => b.caseID - a.caseID);
+            }
+
+            // Search for a case by ID
+            searchCaseByID(caseID) {
+                return this.callHistory.find(call => call.caseID === parseInt(caseID));
+            }
+
+            // Clear all logs
+            clearLogs() {
+                this.callQueue = new PriorityQueue();
+                this.callHistory = [];
+                this.receivedCount = 0;
+                this.dispatchedCount = 0;
+                this.fireCount = 0;
+                this.medicalCount = 0;
+                this.theftCount = 0;
+                this.currentCaseID = 1001;
+                localStorage.removeItem('emergencyDispatchSystem');
+                this.updateUI();
+                this.addActivity("All call logs cleared by dispatcher");
+                this.showNotification("All logs have been cleared", "success");
+            }
+
+            // Update UI elements
+            updateUI() {
+                // Update counters
+                document.getElementById('received-count').textContent = this.receivedCount;
+                document.getElementById('dispatched-count').textContent = this.dispatchedCount;
+                document.getElementById('pending-count').textContent = this.callQueue.size();
+                
+                // Update dispatch button state
+                document.getElementById('dispatch-next-btn').disabled = this.callQueue.isEmpty();
+                
+                // Update pending calls list
+                this.updatePendingCallsList();
+            }
+
+            // Update pending calls list
+            updatePendingCallsList() {
+                const container = document.getElementById('pending-calls-container');
+                container.innerHTML = '';
+                
+                if (this.callQueue.isEmpty()) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">No pending emergency calls</p>';
+                    return;
+                }
+                
+                // Convert priority queue to sorted array
+                const calls = this.callQueue.toArray();
+                
+                calls.forEach(call => {
+                    const callElement = document.createElement('div');
+                    callElement.className = `emergency-card bg-white rounded-md shadow p-4 ${getEmergencyPriorityClass(call.type)}`;
+                    callElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-medium px-2 py-1 rounded-full ${getEmergencyTypeColor(call.type)}">
+                                        ${getEmergencyType(call.type)}
+                                    </span>
+                                    <span class="text-xs text-gray-500">#${call.caseID}</span>
+                                </div>
+                                <h4 class="mt-1 font-medium">${call.callerName}</h4>
+                                <p class="text-sm text-gray-600">${call.location}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500">${call.timeReceived.split(' ')[1]}</p>
+                                <button class="mt-1 text-xs text-primary hover:text-primary-dark font-medium dispatch-btn" data-case-id="${call.caseID}">
+                                    <i class="fas fa-paper-plane mr-1"></i> Dispatch
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(callElement);
+                });
+                
+                // Add event listeners to dispatch buttons
+                document.querySelectorAll('.dispatch-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const caseID = parseInt(e.target.closest('button').dataset.caseId);
+                        this.prepareDispatch(caseID);
+                    });
+                });
+            }
+
+            // Prepare dispatch for a specific case
+            prepareDispatch(caseID) {
+                // Find the call in the queue
+                let callToDispatch = null;
+                const tempQueue = new PriorityQueue();
+                
+                while (!this.callQueue.isEmpty()) {
+                    const call = this.callQueue.dequeue();
+                    if (call.caseID === caseID) {
+                        callToDispatch = call;
+                        break;
+                    }
+                    tempQueue.enqueue(call);
+                }
+                
+                // Put remaining calls back in the queue
+                while (!tempQueue.isEmpty()) {
+                    this.callQueue.enqueue(tempQueue.dequeue());
+                }
+                
+                if (callToDispatch) {
+                    this.showDispatchDetails(callToDispatch);
+                } else {
+                    this.showNotification("Case not found in pending calls", "error");
+                }
+            }
+
+            // Show dispatch details in the panel
+            showDispatchDetails(call) {
+                document.getElementById('dispatch-case-id').textContent = call.caseID;
+                document.getElementById('dispatch-caller').textContent = `${call.callerName} (${call.callerPhone})`;
+                document.getElementById('dispatch-type').textContent = getEmergencyType(call.type);
+                document.getElementById('dispatch-location').textContent = call.location;
+                document.getElementById('dispatch-time').textContent = call.timeReceived;
+                
+                document.getElementById('dispatch-details').classList.remove('hidden');
+                document.getElementById('no-dispatch').classList.add('hidden');
+                
+                // Focus on notes field
+                document.getElementById('dispatch-notes').focus();
+            }
+
+            // Clear dispatch panel
+            clearDispatchPanel() {
+                document.getElementById('dispatch-case-id').textContent = '';
+                document.getElementById('dispatch-caller').textContent = '';
+                document.getElementById('dispatch-type').textContent = '';
+                document.getElementById('dispatch-location').textContent = '';
+                document.getElementById('dispatch-time').textContent = '';
+                document.getElementById('dispatch-notes').value = '';
+                
+                document.getElementById('dispatch-details').classList.add('hidden');
+                document.getElementById('no-dispatch').classList.remove('hidden');
+            }
+
+            // Show notification toast
+            showNotification(message, type = "success") {
+                const toast = document.getElementById('notification-toast');
+                const toastMessage = document.getElementById('toast-message');
+                
+                // Set message and style based on type
+                toastMessage.textContent = message;
+                
+                switch (type) {
+                    case "success":
+                        toast.classList.remove('bg-red-600', 'bg-yellow-500');
+                        toast.classList.add('bg-green-600');
+                        break;
+                    case "error":
+                        toast.classList.remove('bg-green-600', 'bg-yellow-500');
+                        toast.classList.add('bg-red-600');
+                        break;
+                    case "warning":
+                        toast.classList.remove('bg-green-600', 'bg-red-600');
+                        toast.classList.add('bg-yellow-500');
+                        break;
+                }
+                
+                // Show toast
+                toast.classList.remove('opacity-0', 'translate-y-10');
+                toast.classList.add('opacity-100', 'translate-y-0');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100', 'translate-y-0');
+                    toast.classList.add('opacity-0', 'translate-y-10');
+                }, 5000);
+            }
+
+            // Add activity to recent activity feed
+            addActivity(message) {
+                const activityContainer = document.getElementById('recent-activity');
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const activityElement = document.createElement('div');
+                activityElement.className = 'flex items-start';
+                activityElement.innerHTML = `
+                    <div class="flex-shrink-0 bg-blue-100 rounded-full p-2 text-blue-600">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">${message}</p>
+                        <p class="text-sm text-gray-500">${timeString}</p>
+                    </div>
+                `;
+                
+                // Insert at the beginning
+                activityContainer.insertBefore(activityElement, activityContainer.firstChild);
+                
+                // Limit to 5 activities
+                if (activityContainer.children.length > 5) {
+                    activityContainer.removeChild(activityContainer.lastChild);
+                }
+            }
+
+            // Show call logs modal
+            showCallLogsModal() {
+                const modal = document.getElementById('logs-modal');
+                const tableBody = document.getElementById('logs-table-body');
+                
+                // Clear existing rows
+                tableBody.innerHTML = '';
+                
+                // Add call logs to table
+                const logs = this.getCallLogs();
+                if (logs.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No call logs found</td>
+                        </tr>
+                    `;
+                } else {
+                    logs.forEach(call => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${call.caseID}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${call.callerName}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="px-2 py-1 rounded-full text-xs ${getEmergencyTypeColor(call.type)}">
+                                    ${getEmergencyType(call.type)}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${call.location}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${call.timeReceived.split(' ')[1]}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="px-2 py-1 rounded-full text-xs ${call.status === 'DISPATCHED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${call.status}
+                                </span>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+                
+                // Show modal
+                modal.classList.remove('hidden');
+            }
+
+            // Show search modal
+            showSearchModal() {
+                const modal = document.getElementById('search-modal');
+                document.getElementById('search-case-id').value = '';
+                document.getElementById('search-result').classList.add('hidden');
+                modal.classList.remove('hidden');
+                document.getElementById('search-case-id').focus();
+            }
+
+            // Perform search
+            performSearch() {
+                const caseID = document.getElementById('search-case-id').value.trim();
+                if (!caseID) {
+                    this.showNotification("Please enter a case ID", "error");
+                    return;
+                }
+                
+                const foundCase = this.searchCaseByID(caseID);
+                const resultDiv = document.getElementById('search-result');
+                const caseDetailsDiv = document.getElementById('case-details');
+                
+                if (foundCase) {
+                    caseDetailsDiv.innerHTML = `
+                        <p><span class="font-medium">Caller:</span> ${foundCase.callerName} (${foundCase.callerPhone})</p>
+                        <p><span class="font-medium">Type:</span> ${getEmergencyType(foundCase.type)}</p>
+                        <p><span class="font-medium">Location:</span> ${foundCase.location}</p>
+                        <p><span class="font-medium">Time:</span> ${foundCase.timeReceived}</p>
+                        <p><span class="font-medium">Status:</span> <span class="${foundCase.status === 'DISPATCHED' ? 'text-green-600' : 'text-yellow-600'}">${foundCase.status}</span></p>
+                        ${foundCase.description ? `<p><span class="font-medium">Description:</span> ${foundCase.description}</p>` : ''}
+                    `;
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    caseDetailsDiv.innerHTML = '<p class="text-red-600">No case found with that ID</p>';
+                    resultDiv.classList.remove('hidden');
+                }
+            }
+
+            // Show stats modal
+            showStatsModal() {
+                const modal = document.getElementById('stats-modal');
+                document.getElementById('stats-received').textContent = this.receivedCount;
+                document.getElementById('stats-dispatched').textContent = this.dispatchedCount;
+                document.getElementById('stats-fire').textContent = this.fireCount;
+                document.getElementById('stats-medical').textContent = this.medicalCount;
+                document.getElementById('stats-theft').textContent = this.theftCount;
+                document.getElementById('stats-last-id').textContent = this.currentCaseID - 1;
+                document.getElementById('stats-dispatcher').textContent = document.getElementById('dispatcher-id').textContent;
+                modal.classList.remove('hidden');
+            }
+
+            // Show clear logs confirmation modal
+            showClearLogsModal() {
+                const modal = document.getElementById('clear-logs-modal');
+                modal.classList.remove('hidden');
+            }
+        }
+
+        // Initialize the system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const system = new EmergencyDispatchSystem();
+            
+            // New call form submission
+            document.getElementById('new-call-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const callerName = document.getElementById('caller-name').value.trim();
+                const callerPhone = document.getElementById('caller-phone').value.trim();
+                const type = document.getElementById('emergency-type').value;
+                const location = document.getElementById('location').value.trim();
+                const description = document.getElementById('description').value.trim();
+                
+                if (!callerName || !callerPhone || !type || !location) {
+                    system.showNotification("Please fill in all required fields", "error");
+                    return;
+                }
+                
+                const call = system.receiveCall(callerName, callerPhone, type, location, description);
+                system.showNotification(`Call #${call.caseID} received successfully`);
+                
+                // Reset form
+                e.target.reset();
+            });
+            
+            // Dispatch next button
+            document.getElementById('dispatch-next-btn').addEventListener('click', () => {
+                const call = system.dispatchCall();
+                if (call) {
+                    system.showDispatchDetails(call);
+                    system.showNotification(`Call #${call.caseID} dispatched`);
+                }
+            });
+            
+            // Confirm dispatch button
+            document.getElementById('confirm-dispatch-btn').addEventListener('click', () => {
+                const notes = document.getElementById('dispatch-notes').value.trim();
+                const call = system.dispatchCall();
+                if (call) {
+                    if (notes) {
+                        system.addActivity(`Notes for #${call.caseID}: ${notes}`);
+                    }
+                    system.clearDispatchPanel();
+                }
+            });
+            
+            // Cancel dispatch button
+            document.getElementById('cancel-dispatch-btn').addEventListener('click', () => {
+                system.clearDispatchPanel();
+            });
+            
+            // View logs button
+            document.getElementById('view-logs-btn').addEventListener('click', () => {
+                system.showCallLogsModal();
+            });
+            
+            // Close logs modal
+            document.getElementById('close-logs-modal').addEventListener('click', () => {
+                document.getElementById('logs-modal').classList.add('hidden');
+            });
+            
+            // Search case button
+            document.getElementById('search-case-btn').addEventListener('click', () => {
+                system.showSearchModal();
+            });
+            
+            // Perform search button
+            document.getElementById('perform-search-btn').addEventListener('click', () => {
+                system.performSearch();
+            });
+            
+            // Close search modal
+            document.getElementById('close-search-modal').addEventListener('click', () => {
+                document.getElementById('search-modal').classList.add('hidden');
+            });
+            
+            // Stats button
+            document.getElementById('stats-btn').addEventListener('click', () => {
+                system.showStatsModal();
+            });
+            
+            // Close stats modal
+            document.getElementById('close-stats-modal').addEventListener('click', () => {
+                document.getElementById('stats-modal').classList.add('hidden');
+            });
+            
+            // Clear logs button
+            document.getElementById('clear-logs-btn').addEventListener('click', () => {
+                system.showClearLogsModal();
+            });
+            
+            // Confirm clear logs
+            document.getElementById('confirm-clear-logs').addEventListener('click', () => {
+                system.clearLogs();
+                document.getElementById('clear-logs-modal').classList.add('hidden');
+            });
+            
+            // Cancel clear logs
+            document.getElementById('cancel-clear-logs').addEventListener('click', () => {
+                document.getElementById('clear-logs-modal').classList.add('hidden');
+            });
+            
+            // Close notification toast
+            document.getElementById('close-toast').addEventListener('click', () => {
+                const toast = document.getElementById('notification-toast');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-10');
+            });
+            
+            // Close modals when clicking outside
+            document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Add initial activity
+            system.addActivity("Dispatcher system initialized and ready");
+        });
+    </script>
+</body>
+</html>

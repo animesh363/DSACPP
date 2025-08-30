@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Emergency Dispatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            dark: '#1d4ed8'
+                        },
+                        secondary: {
+                            DEFAULT: '#e11d48',
+                            dark: '#be123c'
+                        },
+                        dark: {
+                            DEFAULT: '#0f172a',
+                            light: '#1e293b'
+                        },
+                        light: '#f8fafc'
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'ping-fast': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .emergency-card {
+            transition: all 0.3s ease;
+        }
+        .emergency-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .priority-fire {
+            border-left: 4px solid #ef4444;
+        }
+        .priority-medical {
+            border-left: 4px solid #3b82f6;
+        }
+        .priority-theft {
+            border-left: 4px solid #f59e0b;
+        }
+        .priority-high {
+            border-left: 4px solid #e11d48;
+        }
+        .priority-critical {
+            border-left: 4px solid #dc2626; /* A darker red for critical */
+        }
+        .priority-medium {
+            border-left: 4px solid #f59e0b; /* Orange for medium */
+        }
+        .priority-low {
+            border-left: 4px solid #10b981; /* Green for low */
+        }
+
+        .map-container {
+            height: 300px;
+            background-color: #e5e7eb;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNlNWU3ZWIiLz48cGF0aCBkPSJNMCAwSDYwVjYwSDAiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgMTVjLTguMjg0IDAtMTUgNi43MTYtMTUgMTVzNi43MTYgMTUgMTUgMTUgMTUtNi43MTYgMTUtMTUtNi43MTYtMTUtMTUtMTVtMC0xNUM0Mi40MzEgMCA1MiA5LjU2OSA1MiAyMXMtOS41NjkgMjEtMjEgMjFTMTAgMzIuNDMxIDEwIDIxIDE5LjU2OSAwIDMwIDAiIGZpbGw9IiNjY2MiIG9wYWNpdHk9Ii4yNSIvPjwvc3ZnPg==');
+            background-size: cover; /* Ensure the pattern covers the container */
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .blink {
+            animation: blink-animation 1s steps(5, start) infinite;
+        }
+        @keyframes blink-animation {
+            to { visibility: hidden; }
+        }
+        .page-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(0);
+        }
+        .page-hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+            transform: translateX(100%); /* Slide out to the right */
+        }
+        .page-visible {
+            opacity: 1;
+            position: static; /* Make it take up space when visible */
+            transform: translateX(0);
+        }
+         /* Notification/Toast styles */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.error {
+            background-color: #f44336; /* Red */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark min-h-screen transition-colors duration-300 font-sans">
+    <nav class="bg-primary dark:bg-dark-light text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-broadcast-tower text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">Metro Emergency Dispatch</span>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <button data-page="dashboard" class="nav-link px-3 py-2 rounded-md text-sm font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+                        <button data-page="dispatch" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+                        <button data-page="units" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+                        <button data-page="reports" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+                        <button data-page="settings" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="notifications-btn" class="p-2 rounded-full hover:bg-primary-dark dark:hover:bg-dark relative">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-badge" class="absolute top-0 right-0 bg-secondary rounded-full w-4 h-4 flex items-center justify-center text-xs hidden">0</span>
+                        </button>
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-dark-light rounded-md shadow-lg z-50 py-1">
+                            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">Notifications</p>
+                            </div>
+                            <div id="notifications-list" class="max-h-60 overflow-y-auto">
+                                <div class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">No new notifications</div>
+                            </div>
+                            <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
+                                <a href="#" class="text-xs text-primary dark:text-blue-300 hover:underline">View all</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-blue-200 dark:text-blue-300">Dispatcher</p>
+                            <p class="text-sm font-medium" id="dispatcher-name">Officer <span id="dispatcher-id">#ED-${Math.floor(1000 + Math.random() * 9000)}</span></p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="md:hidden bg-primary dark:bg-dark-light px-4 py-2">
+        <div class="flex overflow-x-auto space-x-2">
+            <button data-page="dashboard" class="nav-link px-3 py-1 rounded-md text-xs font-medium bg-primary-dark dark:bg-dark">Dashboard</button>
+            <button data-page="dispatch" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Dispatch</button>
+            <button data-page="units" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Units</button>
+            <button data-page="reports" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Reports</button>
+            <button data-page="settings" class="nav-link px-3 py-1 rounded-md text-xs font-medium hover:bg-primary-dark dark:hover:bg-dark">Settings</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-6 relative">
+        <div id="dashboard-page" class="page-transition page-visible">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dispatch Dashboard</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-300">Status:</span>
+                        <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Real-time emergency call monitoring and dispatch</p>
+            </div>
+
+            <div id="alert-banner" class="hidden bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 dark:text-yellow-300"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p id="alert-message" class="text-sm text-yellow-700 dark:text-yellow-200"></p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button id="dismiss-alert" class="text-yellow-700 dark:text-yellow-200 hover:text-yellow-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Received Calls</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="received-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="received-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Dispatched</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="dispatched-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="dispatched-today">0</span> today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="pending-count">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="high-priority">0</span> high priority</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-dark-light rounded-lg shadow p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Active Units</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="active-units">0</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span id="available-units">0</span> available</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300">
+                            <i class="fas fa-car-side"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Emergency Map</h2>
+                            <div class="flex space-x-2">
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                                </button>
+                                <button class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-layer-group mr-1"></i> Layers
+                                </button>
+                            </div>
+                        </div>
+                        <div class="map-container relative">
+                            <div id="map-overlay" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 z-10 hidden">
+                                <div class="bg-white dark:bg-dark-light p-4 rounded-md shadow-lg">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">Loading real-time data...</p>
+                                </div>
+                            </div>
+                            <div id="map-markers" class="absolute inset-0 pointer-events-none">
+                                </div>
+                            <div class="absolute bottom-4 right-4 z-10 flex space-x-2">
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-plus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                                <button class="w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <i class="fas fa-minus text-gray-700 dark:text-gray-300"></i>
+                                </button>
+                            </div>
+                            <p class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">Interactive map would appear here</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Active Incidents</h2>
+                            <button id="new-call-btn" class="text-xs px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-md">
+                                <i class="fas fa-plus mr-1"></i> New Call
+                            </button>
+                        </div>
+                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <div id="active-incidents-container">
+                                <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-inbox text-3xl mb-2"></i>
+                                    <p>No active incidents</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Dispatcher Console</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-md p-3 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">System Status</span>
+                                    <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Online</span>
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                    <p>Last sync: <span id="last-sync">Just now</span></p>
+                                    <p>Network: <span class="text-green-600 dark:text-green-400">Stable</span></p>
+                                    <p>System load: <span class="text-yellow-600 dark:text-yellow-400">Medium</span></p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <button id="dispatch-next-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fas fa-paper-plane mr-2"></i> Dispatch Next Priority
+                                </button>
+                                <button id="broadcast-btn" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-bullhorn mr-2"></i> Broadcast Alert
+                                </button>
+                                <button id="panic-btn" class="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> Emergency Panic
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+                            <button id="refresh-activity" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div id="recent-activity" class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 rounded-full p-2 text-blue-600 dark:text-blue-300">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">System initialized</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Dispatcher ready to receive calls</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Just now</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Units Status</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-2 rounded-md">
+                                    <p class="text-xs text-blue-800 dark:text-blue-200">Police</p>
+                                    <p class="text-lg font-bold" id="police-units">0</p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-300"><span id="police-available">0</span> available</p>
+                                </div>
+                                <div class="bg-red-50 dark:bg-red-900 p-2 rounded-md">
+                                    <p class="text-xs text-red-800 dark:text-red-200">Fire</p>
+                                    <p class="text-lg font-bold" id="fire-units">0</p>
+                                    <p class="text-xs text-red-600 dark:text-red-300"><span id="fire-available">0</span> available</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-2 rounded-md">
+                                    <p class="text-xs text-green-800 dark:text-green-200">EMS</p>
+                                    <p class="text-lg font-bold" id="ems-units">0</p>
+                                    <p class="text-xs text-green-600 dark:text-green-300"><span id="ems-available">0</span> available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dispatch-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Call Dispatch Center</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage and dispatch emergency calls</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4 text-primary dark:text-blue-400">Receive New Emergency Call</h2>
+                        <form id="new-call-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="caller-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Name</label>
+                                    <input type="text" id="caller-name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="caller-phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Caller Phone</label>
+                                    <input type="tel" id="caller-phone" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="emergency-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Emergency Type</label>
+                                <select id="emergency-type" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                    <option value="">Select emergency type</option>
+                                    <option value="Theft/Robbery">Theft/Robbery</option>
+                                    <option value="Medical Emergency">Medical Emergency</option>
+                                    <option value="Fire Incident">Fire Incident</option>
+                                    <option value="Traffic Accident">Traffic Accident</option>
+                                    <option value="Domestic Disturbance">Domestic Disturbance</option>
+                                    <option value="Suspicious Activity">Suspicious Activity</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                                    <input type="text" id="location" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                </div>
+                                <div>
+                                    <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</label>
+                                    <select id="priority" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                        <option value="low">Low</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="high">High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                <textarea id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="reset" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    Clear
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                    <i class="fas fa-phone-alt mr-2"></i> Receive Call
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold text-primary dark:text-blue-400">Pending Calls</h2>
+                            <div class="flex space-x-2">
+                                <button id="sort-priority-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="fas fa-sort-amount-down mr-1"></i> Priority
+                                </button>
+                                <button id="sort-time-btn" class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    <i class="far fa-clock mr-1"></i> Time
+                                </button>
+                                <button id="dispatch-selected-btn" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fas fa-paper-plane mr-1"></i> Dispatch Selected
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pending-calls-container" class="space-y-3">
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No pending emergency calls</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-dark-light rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Dispatched Call History</h2>
+                        </div>
+                        <div class="p-4">
+                            <div id="dispatched-calls-history" class="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-2">No calls dispatched yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="units-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Unit Management</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage and monitor emergency response units</p>
+            </div>
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <p class="text-gray-700 dark:text-gray-300">Content for Unit Management will go here.</p>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">You can add forms to add/edit units, tables to show their status, location, etc.</p>
+            </div>
+        </div>
+
+        <div id="reports-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h1>
+                <p class="text-gray-600 dark:text-gray-400">Generate reports and analyze dispatch data</p>
+            </div>
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <p class="text-gray-700 dark:text-gray-300">Content for Reports and Analytics will go here.</p>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">This could include charts for call volume, response times, unit efficiency, etc.</p>
+            </div>
+        </div>
+
+        <div id="settings-page" class="page-transition page-hidden">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+                <p class="text-gray-600 dark:text-gray-400">Configure system preferences</p>
+            </div>
+            <div class="bg-white dark:bg-dark-light rounded-lg shadow p-6">
+                <p class="text-gray-700 dark:text-gray-300">Content for Settings will go here.</p>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">Example settings: Notification preferences, user management, system integrations.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // --- Dark Mode Toggle ---
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const htmlElement = document.documentElement;
+
+        // Check for saved theme preference or system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // --- Page Navigation ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page-transition');
+        const newCallBtnDashboard = document.getElementById('new-call-btn'); // New Call button on dashboard
+
+        function showPage(pageId) {
+            pages.forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('page-hidden');
+                    page.classList.add('page-visible');
+                } else {
+                    page.classList.add('page-hidden');
+                    page.classList.remove('page-visible');
+                }
+            });
+
+            // Update active state for nav links
+            navLinks.forEach(link => {
+                if (link.dataset.page === pageId.replace('-page', '')) {
+                    link.classList.add('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.remove('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                } else {
+                    link.classList.remove('bg-primary-dark', 'dark:bg-dark');
+                    link.classList.add('hover:bg-primary-dark', 'dark:hover:bg-dark');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const pageId = link.dataset.page + '-page';
+                showPage(pageId);
+            });
+        });
+
+        // "New Call" button on Dashboard switches to Dispatch page
+        newCallBtnDashboard.addEventListener('click', () => {
+            showPage('dispatch-page');
+            // Optional: Scroll to the new call form
+            document.getElementById('new-call-form').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Initial page load
+        showPage('dashboard-page');
+
+        // --- Notifications Dropdown ---
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        const notificationBadge = document.getElementById('notification-badge');
+        const notificationsList = document.getElementById('notifications-list');
+
+        let notificationCount = 0;
+
+        function addNotification(message, type = 'info') {
+            notificationCount++;
+            notificationBadge.textContent = notificationCount;
+            notificationBadge.classList.remove('hidden');
+
+            const notificationItem = document.createElement('div');
+            notificationItem.className = `flex items-start px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0`;
+            notificationItem.innerHTML = `
+                <div class="flex-shrink-0 ${type === 'alert' ? 'text-red-500' : 'text-blue-500'} mr-2">
+                    <i class="fas ${type === 'alert' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">${message}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${new Date().toLocaleTimeString()}</p>
+                </div>
+            `;
+            if (notificationsList.querySelector('.text-center')) {
+                notificationsList.innerHTML = ''; // Remove "No new notifications" message
+            }
+            notificationsList.prepend(notificationItem);
+        }
+
+        notificationsBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent document click from closing immediately
+            notificationsDropdown.classList.toggle('hidden');
+            if (!notificationsDropdown.classList.contains('hidden')) {
+                notificationBadge.classList.add('hidden'); // Hide badge when opened
+                notificationCount = 0; // Reset count
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!notificationsDropdown.contains(event.target) && !notificationsBtn.contains(event.target)) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        });
+
+        // Add initial system ready notification
+        addNotification('System initialized. Dispatcher ready.', 'info');
+
+        // --- Alert Banner ---
+        const alertBanner = document.getElementById('alert-banner');
+        const alertMessage = document.getElementById('alert-message');
+        const dismissAlertBtn = document.getElementById('dismiss-alert');
+
+        function showAlert(message, type = 'warning') {
+            alertMessage.textContent = message;
+            alertBanner.classList.remove('hidden', 'bg-yellow-50', 'border-yellow-400', 'bg-red-50', 'border-red-400', 'dark:bg-yellow-900', 'dark:border-yellow-600', 'dark:bg-red-900', 'dark:border-red-600');
+            if (type === 'warning') {
+                alertBanner.classList.add('bg-yellow-50', 'border-yellow-400', 'dark:bg-yellow-900', 'dark:border-yellow-600');
+            } else if (type === 'error') {
+                alertBanner.classList.add('bg-red-50', 'border-red-400', 'dark:bg-red-900', 'dark:border-red-600');
+            }
+            alertBanner.classList.remove('hidden');
+        }
+
+        dismissAlertBtn.addEventListener('click', () => {
+            alertBanner.classList.add('hidden');
+        });
+
+        // --- Toast Notification System ---
+        const toastContainer = document.getElementById('toast-container');
+
+        function showToast(message, type = 'success', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            // Trigger reflow to apply transition
+            void toast.offsetWidth;
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, duration);
+        }
+
+        // --- Call and Dispatch Logic ---
+        let receivedCallsTotal = 0;
+        let receivedCallsToday = 0;
+        let dispatchedCallsTotal = 0;
+        let dispatchedCallsToday = 0;
+
+        const pendingCalls = []; // Stores objects of pending calls
+        const dispatchedCalls = []; // Stores objects of dispatched calls
+
+        // Utility function to format timestamp
+        function formatTimestamp(date) {
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) + ' - ' +
+                   date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Function to update dashboard statistics
+        function updateDashboardStats() {
+            document.getElementById('received-count').textContent = receivedCallsTotal;
+            document.getElementById('received-today').textContent = receivedCallsToday;
+            document.getElementById('dispatched-count').textContent = dispatchedCallsTotal;
+            document.getElementById('dispatched-today').textContent = dispatchedCallsToday;
+
+            const highPriorityCount = pendingCalls.filter(call => call.priority === 'high' || call.priority === 'critical').length;
+            document.getElementById('pending-count').textContent = pendingCalls.length;
+            document.getElementById('high-priority').textContent = highPriorityCount;
+
+            // Unit stats (dummy values for now, can be expanded)
+            const policeUnits = 5;
+            const policeAvailable = Math.max(0, policeUnits - pendingCalls.filter(c => c.emergencyType.includes('Theft') || c.emergencyType.includes('Disturbance')).length);
+            const fireUnits = 3;
+            const fireAvailable = Math.max(0, fireUnits - pendingCalls.filter(c => c.emergencyType.includes('Fire')).length);
+            const emsUnits = 4;
+            const emsAvailable = Math.max(0, emsUnits - pendingCalls.filter(c => c.emergencyType.includes('Medical')).length);
+
+            document.getElementById('police-units').textContent = policeUnits;
+            document.getElementById('police-available').textContent = policeAvailable;
+            document.getElementById('fire-units').textContent = fireUnits;
+            document.getElementById('fire-available').textContent = fireAvailable;
+            document.getElementById('ems-units').textContent = emsUnits;
+            document.getElementById('ems-available').textContent = emsAvailable;
+
+            document.getElementById('active-units').textContent = policeUnits + fireUnits + emsUnits;
+            document.getElementById('available-units').textContent = policeAvailable + fireAvailable + emsAvailable;
+
+
+            // Enable/disable dispatch buttons
+            const dispatchNextBtnConsole = document.getElementById('dispatch-next-btn');
+            const dispatchSelectedBtnDispatch = document.getElementById('dispatch-selected-btn');
+            const dispatchNextBtnDispatch = document.getElementById('dispatch-next-btn2'); // This was already in your HTML for the pending calls section
+
+            if (pendingCalls.length > 0) {
+                dispatchNextBtnConsole.disabled = false;
+                dispatchNextBtnDispatch.disabled = false;
+            } else {
+                dispatchNextBtnConsole.disabled = true;
+                dispatchNextBtnDispatch.disabled = true;
+            }
+
+            // Check if any checkbox is selected for "Dispatch Selected"
+            const checkboxes = document.querySelectorAll('#pending-calls-container input[type="checkbox"]');
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            dispatchSelectedBtnDispatch.disabled = !anyChecked;
+        }
+
+        // Function to render pending calls
+        function renderPendingCalls() {
+            const container = document.getElementById('pending-calls-container');
+            const activeIncidentsContainer = document.getElementById('active-incidents-container');
+            container.innerHTML = ''; // Clear existing list
+            activeIncidentsContainer.innerHTML = ''; // Clear existing list for dashboard
+
+            if (pendingCalls.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">No pending emergency calls</p>';
+                activeIncidentsContainer.innerHTML = `
+                    <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-inbox text-3xl mb-2"></i>
+                        <p>No active incidents</p>
+                    </div>
+                `;
+                updateDashboardStats();
+                return;
+            }
+
+            pendingCalls.forEach(call => {
+                const priorityClass = `priority-${call.priority}`;
+                const callId = `CALL-${call.id}`;
+
+                // Card for Dispatch Page (Pending Calls)
+                const pendingCard = document.createElement('div');
+                pendingCard.id = `pending-call-${call.id}`; // Unique ID for each card
+                pendingCard.className = `emergency-card bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex items-start space-x-4 ${priorityClass}`;
+                pendingCard.innerHTML = `
+                    <div class="flex-shrink-0 mt-1">
+                        <input type="checkbox" data-call-id="${call.id}" class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:checked:bg-primary-dark">
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-bold text-lg text-gray-900 dark:text-white flex items-center">
+                                ${call.priority === 'critical' ? '<i class="fas fa-exclamation-circle text-secondary animate-ping-fast mr-2"></i>' : ''}
+                                ${call.emergencyType} <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">#${callId}</span>
+                            </h3>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full capitalize
+                                ${call.priority === 'critical' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                call.priority === 'high' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                                call.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}">
+                                ${call.priority}
+                            </span>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 mb-2">${call.description || 'No description provided.'}</p>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center mb-1">
+                            <i class="fas fa-map-marker-alt mr-2 text-primary"></i> ${call.location}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center mb-2">
+                            <i class="fas fa-user mr-2 text-primary"></i> ${call.callerName} (<a href="tel:${call.callerPhone}" class="hover:underline">${call.callerPhone}</a>)
+                        </div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 flex justify-between items-center">
+                            <span>Received: ${formatTimestamp(call.timestamp)}</span>
+                            <button data-call-id="${call.id}" class="dispatch-call-btn px-3 py-1 bg-primary text-white text-xs rounded-md hover:bg-primary-dark">Dispatch</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(pendingCard);
+
+                // Card for Dashboard (Active Incidents) - simplified version
+                const activeIncidentCard = document.createElement('div');
+                activeIncidentCard.id = `active-incident-${call.id}`; // Unique ID for each card
+                activeIncidentCard.className = `p-4 flex items-start space-x-3 ${priorityClass}`;
+                activeIncidentCard.innerHTML = `
+                    <div class="flex-shrink-0 text-lg">
+                        <i class="fas ${call.emergencyType.includes('Fire') ? 'fa-fire' : call.emergencyType.includes('Medical') ? 'fa-heartbeat' : call.emergencyType.includes('Theft') ? 'fa-hand-rock' : 'fa-bell'} text-primary dark:text-blue-300"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">${call.emergencyType} at ${call.location}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Priority: <span class="capitalize font-semibold
+                            ${call.priority === 'critical' ? 'text-red-600 dark:text-red-300' :
+                            call.priority === 'high' ? 'text-orange-600 dark:text-orange-300' :
+                            call.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-300' :
+                            'text-green-600 dark:text-green-300'}">
+                            ${call.priority}
+                        </span> - Call ID: #${callId}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Received: ${formatTimestamp(call.timestamp)}</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button data-call-id="${call.id}" class="dispatch-call-btn-dashboard text-xs px-2 py-1 bg-primary hover:bg-primary-dark text-white rounded-md">Dispatch</button>
+                    </div>
+                `;
+                activeIncidentsContainer.appendChild(activeIncidentCard);
+            });
+
+            // Add event listeners for new dispatch buttons
+            document.querySelectorAll('.dispatch-call-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const callId = parseInt(event.target.dataset.callId);
+                    dispatchCall(callId);
+                });
+            });
+             document.querySelectorAll('.dispatch-call-btn-dashboard').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const callId = parseInt(event.target.dataset.callId);
+                    dispatchCall(callId);
+                    showPage('dispatch-page'); // Switch to dispatch page after dispatching from dashboard
+                });
+            });
+
+            // Add event listeners for checkboxes to enable/disable dispatch selected button
+            document.querySelectorAll('#pending-calls-container input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateDashboardStats); // Re-run to check button state
+            });
+
+            updateDashboardStats();
+        }
+
+        // Function to render dispatched calls history
+        function renderDispatchedCallsHistory() {
+            const container = document.getElementById('dispatched-calls-history');
+            container.innerHTML = ''; // Clear existing list
+
+            if (dispatchedCalls.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">No calls dispatched yet.</p>';
+                return;
+            }
+
+            // Display in reverse chronological order (most recent first)
+            dispatchedCalls.slice().reverse().forEach(call => {
+                const historyItem = document.createElement('div');
+                historyItem.className = `bg-gray-50 dark:bg-gray-800 rounded-md p-3 mb-2 flex items-center`;
+                historyItem.innerHTML = `
+                    <div class="flex-shrink-0 text-green-500 dark:text-green-300 mr-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-medium text-gray-900 dark:text-white">${call.emergencyType} to ${call.location}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Dispatched: ${formatTimestamp(call.dispatchedTimestamp)} by ${call.dispatchedBy}</p>
+                    </div>
+                    <div class="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        DISPATCHED
+                    </div>
+                `;
+                container.appendChild(historyItem);
+            });
+        }
+
+        // Function to update recent activity on dashboard
+        function updateRecentActivity(activityMessage, type = 'info') {
+            const recentActivityContainer = document.getElementById('recent-activity');
+            const newActivity = document.createElement('div');
+            newActivity.className = `flex items-start`;
+            newActivity.innerHTML = `
+                <div class="flex-shrink-0 ${type === 'dispatch' ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300' : type === 'receive' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'} rounded-full p-2">
+                    <i class="fas ${type === 'dispatch' ? 'fa-paper-plane' : type === 'receive' ? 'fa-phone-volume' : 'fa-info'}"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">${activityMessage}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${formatTimestamp(new Date())}</p>
+                </div>
+            `;
+            // Add new activity to the top
+            recentActivityContainer.prepend(newActivity);
+            // Limit to last 5 activities
+            while (recentActivityContainer.children.length > 5) {
+                recentActivityContainer.removeChild(recentActivityContainer.lastChild);
+            }
+        }
+
+
+        // --- Event Listeners for Call Management ---
+
+        // Receive New Call Form Submission
+        const newCallForm = document.getElementById('new-call-form');
+        newCallForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const callerName = document.getElementById('caller-name').value;
+            const callerPhone = document.getElementById('caller-phone').value;
+            const emergencyType = document.getElementById('emergency-type').value;
+            const location = document.getElementById('location').value;
+            const priority = document.getElementById('priority').value;
+            const description = document.getElementById('description').value;
+
+            if (!callerName || !callerPhone || !emergencyType || !location) {
+                showAlert('Please fill in all required fields (Caller Name, Phone, Emergency Type, Location).', 'error');
+                showToast('Error: Please fill all required fields.', 'error');
+                return;
+            }
+
+            const newCall = {
+                id: Date.now(), // Unique ID based on timestamp
+                callerName,
+                callerPhone,
+                emergencyType,
+                location,
+                priority,
+                description,
+                timestamp: new Date(),
+                status: 'pending'
+            };
+
+            pendingCalls.push(newCall);
+            // Sort pending calls: Critical > High > Medium > Low, then by oldest first
+            pendingCalls.sort((a, b) => {
+                const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[b.priority] - priorityOrder[a.priority]; // Higher priority first
+                }
+                return a.timestamp - b.timestamp; // Then by oldest first
+            });
+
+            receivedCallsTotal++;
+            receivedCallsToday++;
+
+            renderPendingCalls();
+            updateDashboardStats();
+            updateRecentActivity(`New call received: ${emergencyType} at ${location}`, 'receive');
+            addNotification(`New Call: ${emergencyType} at ${location} (${priority} priority)`, 'alert');
+            showToast('New emergency call received!', 'success');
+            newCallForm.reset(); // Clear the form
+        });
+
+        // Dispatch Single Call from Pending Calls list (Dispatch Page)
+        function dispatchCall(callId) {
+            const callIndex = pendingCalls.findIndex(call => call.id === callId);
+
+            if (callIndex > -1) {
+                const [dispatchedCall] = pendingCalls.splice(callIndex, 1);
+                dispatchedCall.status = 'dispatched';
+                dispatchedCall.dispatchedTimestamp = new Date();
+                dispatchedCall.dispatchedBy = document.getElementById('dispatcher-id').textContent; // Get dispatcher ID from nav
+
+                dispatchedCalls.push(dispatchedCall);
+
+                dispatchedCallsTotal++;
+                dispatchedCallsToday++;
+
+                renderPendingCalls(); // Re-render pending calls list
+                renderDispatchedCallsHistory(); // Update dispatched calls history
+                updateDashboardStats();
+                updateRecentActivity(`Call #${dispatchedCall.id} (${dispatchedCall.emergencyType}) dispatched to ${dispatchedCall.location}`, 'dispatch');
+                addNotification(`Call #${dispatchedCall.id} Dispatched!`, 'info');
+                showToast(`Call #${dispatchedCall.id} dispatched successfully!`, 'success');
+            } else {
+                showAlert(`Error: Call ID ${callId} not found in pending calls.`, 'error');
+                showToast(`Error dispatching call ID ${callId}.`, 'error');
+            }
+        }
+
+        // Dispatch Next Priority (Console Button on Dashboard)
+        const dispatchNextPriorityBtnConsole = document.getElementById('dispatch-next-btn');
+        dispatchNextPriorityBtnConsole.addEventListener('click', () => {
+            if (pendingCalls.length > 0) {
+                // Since pendingCalls are already sorted by priority, just take the first one
+                const nextCallToDispatch = pendingCalls[0];
+                dispatchCall(nextCallToDispatch.id);
+            } else {
+                showAlert('No pending calls to dispatch.', 'warning');
+                showToast('No pending calls to dispatch.', 'warning');
+            }
+        });
+
+        // Dispatch Next (from Pending Calls section on Dispatch page)
+        const dispatchNextBtn2 = document.getElementById('dispatch-next-btn2'); // This is the button in the pending calls section
+        dispatchNextBtn2.addEventListener('click', () => {
+             if (pendingCalls.length > 0) {
+                const nextCallToDispatch = pendingCalls[0];
+                dispatchCall(nextCallToDispatch.id);
+            } else {
+                showAlert('No pending calls to dispatch.', 'warning');
+                showToast('No pending calls to dispatch.', 'warning');
+            }
+        });
+
+
+        // Dispatch Selected Calls (from Pending Calls section on Dispatch page)
+        const dispatchSelectedBtn = document.getElementById('dispatch-selected-btn');
+        dispatchSelectedBtn.addEventListener('click', () => {
+            const selectedCheckboxes = document.querySelectorAll('#pending-calls-container input[type="checkbox"]:checked');
+            if (selectedCheckboxes.length === 0) {
+                showToast('No calls selected for dispatch.', 'info');
+                return;
+            }
+
+            // Collect IDs of selected calls
+            const selectedCallIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.callId));
+
+            // Dispatch calls one by one (iterating in reverse to avoid index issues if modifying original array)
+            // Or, for simplicity and to avoid re-rendering multiple times, just find them in pendingCalls and dispatch
+            // Let's create a temporary array to hold calls to dispatch and then process
+            const callsToDispatch = pendingCalls.filter(call => selectedCallIds.includes(call.id));
+
+            callsToDispatch.forEach(call => {
+                dispatchCall(call.id); // This function already handles removal from pendingCalls and adding to dispatchedCalls
+            });
+
+            if (callsToDispatch.length > 0) {
+                 showToast(`${callsToDispatch.length} call(s) dispatched successfully!`, 'success');
+            }
+            // Re-render and update stats are handled by dispatchCall
+        });
+
+
+        // Sorting for Pending Calls
+        const sortPriorityBtn = document.getElementById('sort-priority-btn');
+        const sortTimeBtn = document.getElementById('sort-time-btn');
+
+        sortPriorityBtn.addEventListener('click', () => {
+            pendingCalls.sort((a, b) => {
+                const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                return priorityOrder[b.priority] - priorityOrder[a.priority]; // Descending priority
+            });
+            renderPendingCalls();
+            showToast('Pending calls sorted by priority.', 'info');
+        });
+
+        sortTimeBtn.addEventListener('click', () => {
+            pendingCalls.sort((a, b) => a.timestamp - b.timestamp); // Oldest first
+            renderPendingCalls();
+            showToast('Pending calls sorted by time (oldest first).', 'info');
+        });
+
+        // Refresh activity on dashboard
+        document.getElementById('refresh-activity').addEventListener('click', () => {
+            // In a real app, this would fetch fresh data. Here, it just re-renders current data.
+            updateRecentActivity('Activity feed refreshed.', 'info');
+            showToast('Activity feed refreshed!', 'info');
+        });
+
+        // Initialize dashboard stats and pending/dispatched calls display
+        updateDashboardStats();
+        renderPendingCalls();
+        renderDispatchedCallsHistory(); // Ensure history is rendered on page load
+
+
+        // --- Example of other "not working" features if you provide details ---
+        // For example, if "Broadcast Alert" and "Emergency Panic" buttons were not working:
+        document.getElementById('broadcast-btn').addEventListener('click', () => {
+            showAlert('Broadcasting system-wide alert! Please provide a message to broadcast.', 'warning');
+            addNotification('Broadcast initiated. Check console for message.', 'alert');
+            showToast('Broadcast initiated!', 'info');
+            // In a real app, this would open a modal or send an actual broadcast.
+            console.log('Broadcasting alert...');
+        });
+
+        document.getElementById('panic-btn').addEventListener('click', () => {
+            showAlert('CRITICAL EMERGENCY! System-wide panic initiated. All units standby.', 'error');
+            addNotification('Emergency Panic Activated!', 'alert');
+            showToast('Emergency Panic Activated!', 'error');
+            // In a real app, this would trigger critical alarms, lockdown, etc.
+            console.warn('EMERGENCY PANIC BUTTON ACTIVATED!');
+        });
+
+    </script>
+</body>
+</html>
