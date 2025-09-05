@@ -157,11 +157,11 @@ Q2)calculateD(int A, int B) that returns A + B
 
 
 
-enum Mode {
-    WASH,   // 0
-    RINSE,  // 1
-    SPIN    // 2
-};
+// enum Mode {
+//     WASH,   // 0
+//     RINSE,  // 1
+//     SPIN    // 2
+// };
 
 // int main() {
 //     Mode currentMode;

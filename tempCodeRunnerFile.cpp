@@ -1,12 +1,22 @@
-int countDigits(int n){
-    int cnt = (int)(log10(n) +1);
-    return cnt;
-}
+#include <iostream>
+using namespace std;
+//    ----PATTERNS----    //
 
+void print1(int n){
+    for(int i =0;i<n;i++){
+        for(int j=0;j<n;j++){
+            cout<<"* ";
+        }
+        cout<<endl;
+    }
+}
 int main(){
+    int t;
+    cin>>t; //for testcases
+
+    for(int i=0;i<t;i++){
     int n;
-    cout<<"Enter number: ";
     cin>>n;
-    int digits = countDigits(n);
-    cout<<digits;
+    print1(n);
+    }
 }

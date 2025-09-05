@@ -2,7 +2,7 @@
 using namespace std;
 
 
-//COUNT DIGIT (optimal) O(1)
+// COUNT DIGIT (optimal) O(1)
 // int countDigits(int n){
 //     int cnt = (int)(log10(n) +1);
 //     return cnt;
@@ -54,9 +54,6 @@ using namespace std;
 //     int c = a + b;
 //     return c;
 // }
-
-
-
 
 // void printDivisor(int n){
 //     for(int i=1; i<=n; i++){
@@ -111,20 +108,20 @@ using namespace std;
 //     printName();
 // }
 
-void printName(string name){
-    cout<<"Hey "<<name;
-}
-int main(){
-    string name;
-    cout<<"Name: ";
-    cin>>name;
+// void printName(string name){
+//     cout<<"Hey "<<name;
+// }
+// int main(){
+//     string name;
+//     cout<<"Name: ";
+//     cin>>name;
 
-    printName(name);
+//     printName(name);
 
-    string name2 = "Pranav";
-    cin>>name2;
-    printName(name2);
-}
+//     string name2 = "Pranav";
+//     cin>>name2;
+//     printName(name2);
+// }
 
 
 //MIN MAX FUNCTION
@@ -516,7 +513,7 @@ int main(){
 //    string s;
 //    cin>>s;
 
-   //pre compute
+//    //pre compute
 //    int hash[26] = {0};
 //    for(int i = 0; i<s.size(); i++){
 //       hash[s[i] -'a']++ ;
