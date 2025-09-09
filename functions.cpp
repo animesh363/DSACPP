@@ -90,26 +90,99 @@ using namespace std;
 // cout<<ncr;
 // }
 
+//with function 
+
+// int fn(int x){
+//     int fact=1;
+//     for(int i=2;i<=x; i++){
+//         fact = fact * i;
+//     }
+//     return fact ;
+// }
+// int main(){
+//     int n, r;
+//     cout <<"Enter n and r: ";
+//     cin>>n >>r;
+//     int nfact = fn(n);
+//     int rfact = fn(r);
+//     int nrfact = fn(n-r);
+
+//     int ncr = nfact / (rfact * nrfact);
+//     cout<<ncr;
+
+// }
+
 
 //PERMUTATION:) number of ways to arrange or select objects from a given set of objects  nPr = n! / (n - r)!
 
-int main(){
-int n, r;
-cout<<"Enter n: ";
-cin>>n;
-cout<<"Enter r: ";
-cin>>r;
-int nfact = 1;
-for(int i=2; i<=n; i++){
-    nfact = nfact * i;
-}
-int nrfact = 1;
-for(int i=2; i<=(n-r);i++){
-    nrfact = nrfact * i;
-}
+// int main(){
+// int n, r;
+// cout<<"Enter n: ";
+// cin>>n;
+// cout<<"Enter r: ";
+// cin>>r;
+// int nfact = 1;
+// for(int i=2; i<=n; i++){
+//     nfact = nfact * i;
+// }
+// int nrfact = 1;
+// for(int i=2; i<=(n-r);i++){
+//     nrfact = nrfact * i;
+// }
 
-int npr = nfact / nrfact ;
-cout<< npr;
+// int npr = nfact / nrfact ;
+// cout<< npr;
+// }
+
+
+// with function 
+
+// int fn(int x){
+//     int fact=1;
+//     for(int i=2;i<=x; i++){
+//         fact = fact * i;
+//     }
+//     return fact ;
+// }
+// int main(){
+//     int n, r;
+//     cout <<"Enter n and r: ";
+//     cin>>n >>r;
+//     int nfact = fn(n);
+//     int nrfact = fn(n-r);
+    
+//     int npr = nfact / nrfact;
+//     cout<<npr;
+
+// }
+
+
+
+int fact(int x){
+    int f = 1;
+    for(int i=2;i<=x;i++){
+        f = f * i;
+    }
+    return f;
+}
+int com(int n, int r){
+    int ncr = fact(n) / (fact(r) * fact(n-r));
+    return ncr;
+}
+int per(int n, int r){
+    int npr = fact(n) / fact(n-r);
+    return npr;
+}
+int main(){
+    int n, r;
+    cout<<"Enter n: ";
+    cin>>n;
+    cout<<"Enter r: ";
+    cin>>r;
+    cout<<"ncr = " << com(n, r) <<endl;
+    cout<<"npr = " << per(n, r) <<endl;
+
+
 }
 
 
