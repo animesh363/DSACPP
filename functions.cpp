@@ -15,11 +15,52 @@ using namespace std;
 //     } 
 // }
 
-void greeting(){
-    cout<<"Hello!"<<endl;
-    cout<<"Good Morning"<<endl;
+// void greeting(){
+//     cout<<"Hello!"<<endl;
+//     cout<<"Good Morning"<<endl;
+// }
+// int main(){
+//     greeting();
+// }
+
+
+//fUNCTIONS 
+
+// void pattern(int x){
+//     for(int i=1;i<=x;i++){
+//         for (int j=1;j<=i;j++){
+//             cout<<"* ";
+//         }
+//         cout<<endl;
+//     }
+    
+// }
+
+// int main(){
+//     pattern(3);
+//     pattern(4);(Actual argument )
+//     pattern(5);
+// }
+
+// int sum(int x, int y){
+//     return x + y;
+// }
+// int main(){
+//     int num1 =5;
+//     int num2 = 6;
+//     cout<<sum(num1, num2); //Formal argument
+// }
+int mini(int n1, int n2){
+    int a;
+    if(n1<n2) a = n1;
+    else a=n2;
+    return a;
 }
+
 int main(){
-    greeting();
+    cout<<mini(4,6);
 }
+
+
+
 
