@@ -50,17 +50,44 @@ using namespace std;
 //     int num2 = 6;
 //     cout<<sum(num1, num2); //Formal argument
 // }
-int mini(int n1, int n2){
-    int a;
-    if(n1<n2) a = n1;
-    else a=n2;
-    return a;
-}
+// int mini(int n1, int n2){
+//     int a;
+//     if(n1<n2) a = n1;
+//     else a=n2;
+//     return a;
+// }
+
+// int main(){
+//     cout<<mini(4,6);
+// }
+
+
+
+// ________________________________________________________     PERMUTATION AND COMBINATION     ________________________________________________________
+
 
 int main(){
-    cout<<mini(4,6);
+    int n, r;
+cout<< "enter n: ";
+cin>>n;
+cout<<"enter r: ";
+cin>>r;
+
+int nfact =1;
+for(int i=2; i<=n;i++){  
+    nfact = nfact * i;        
 }
+int rfact = 1;
+for(int i=2; i<=r; i++){
+    rfact = rfact * i;
+}
+int nrfact = 1;
+for (int i=2; i<=(n-r); i++){
+    nrfact = nrfact * i;
+};
 
+int ncr = nfact / (rfact * nrfact);
 
+cout<<ncr;
 
-
+}
