@@ -65,29 +65,51 @@ using namespace std;
 
 // ________________________________________________________     PERMUTATION AND COMBINATION     ________________________________________________________
 
+//COMBIONATION:) choosing r items out of n items  nCr = n! / (r!(n - r)!)
+// int main(){
+//     int n, r;
+// cout<< "enter n: ";
+// cin>>n;
+// cout<<"enter r: ";
+// cin>>r;
+
+// int nfact =1;
+// for(int i=2; i<=n;i++){  
+//     nfact = nfact * i;        
+// }
+// int rfact = 1;
+// for(int i=2; i<=r; i++){
+//     rfact = rfact * i;
+// }
+// int nrfact = 1;
+// for (int i=2; i<=(n-r); i++){
+//     nrfact = nrfact * i;
+// };
+
+// int ncr = nfact / (rfact * nrfact);
+// cout<<ncr;
+// }
+
+
+//PERMUTATION:) number of ways to arrange or select objects from a given set of objects  nPr = n! / (n - r)!
 
 int main(){
-    int n, r;
-cout<< "enter n: ";
+int n, r;
+cout<<"Enter n: ";
 cin>>n;
-cout<<"enter r: ";
+cout<<"Enter r: ";
 cin>>r;
-
-int nfact =1;
-for(int i=2; i<=n;i++){  
-    nfact = nfact * i;        
-}
-int rfact = 1;
-for(int i=2; i<=r; i++){
-    rfact = rfact * i;
+int nfact = 1;
+for(int i=2; i<=n; i++){
+    nfact = nfact * i;
 }
 int nrfact = 1;
-for (int i=2; i<=(n-r); i++){
+for(int i=2; i<=(n-r);i++){
     nrfact = nrfact * i;
-};
-
-int ncr = nfact / (rfact * nrfact);
-
-cout<<ncr;
-
 }
+
+int npr = nfact / nrfact ;
+cout<< npr;
+}
+
+
