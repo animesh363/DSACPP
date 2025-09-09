@@ -158,31 +158,57 @@ using namespace std;
 
 
 
+// int fact(int x){
+//     int f = 1;
+//     for(int i=2;i<=x;i++){
+//         f = f * i;
+//     }
+//     return f;
+// }
+// int com(int n, int r){
+//     int ncr = fact(n) / (fact(r) * fact(n-r));
+//     return ncr;
+// }
+// int per(int n, int r){
+//     int npr = fact(n) / fact(n-r);
+//     return npr;
+// }
+// int main(){
+//     int n, r;
+//     cout<<"Enter n: ";
+//     cin>>n;
+//     cout<<"Enter r: ";
+//     cin>>r;
+//     cout<<"ncr = " << com(n, r) <<endl;
+//     cout<<"npr = " << per(n, r) <<endl;
+
+// }
+
+
+
+//PASCLE TRIANGLE
+
 int fact(int x){
     int f = 1;
     for(int i=2;i<=x;i++){
-        f = f * i;
+        f=f*i;
     }
     return f;
 }
-int com(int n, int r){
-    int ncr = fact(n) / (fact(r) * fact(n-r));
+int combn(int n, int r){
+    int ncr = fact(n) / (fact(r) *fact(n-r));
     return ncr;
 }
-int per(int n, int r){
-    int npr = fact(n) / fact(n-r);
-    return npr;
-}
+
 int main(){
-    int n, r;
+    int n;
     cout<<"Enter n: ";
     cin>>n;
-    cout<<"Enter r: ";
-    cin>>r;
-    cout<<"ncr = " << com(n, r) <<endl;
-    cout<<"npr = " << per(n, r) <<endl;
 
+    for(int i=0;i<n;i++){
+        for(int j=0;j<=i;j++){
+            cout<<combn(i,j) << " ";
+        }cout<<endl;
+    }
 
 }
-
-
