@@ -332,17 +332,29 @@ using namespace std;
 //     }
 // }
 
-//Q)  Swapping of 2 numbers 
+//Q)  Swapping of 2 numbers (with temp)
+
+// int main(){
+//     int a, b;
+//     cout<<"Enter a and b : ";
+//     cin>>a >>b;
+//     int temp = a;
+//     a=b;
+//     b=temp;
+    
+//     cout<< a << " ," << b;
+// }
 
 int main(){
     int a, b;
     cout<<"Enter a and b : ";
     cin>>a >>b;
-    int temp = a;
-    a=b;
-    b=temp;
     
-    cout<< a << " ," << b;
+    a = a + b;
+    b = a - b;
+    a = a - b;
+    
+    cout<< "Number swaped : "<< a << " ," << b;
 }
 
 
