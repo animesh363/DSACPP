@@ -251,22 +251,48 @@ using namespace std;
 //     fn(true);  // 1 0       1->true
 // }
 
+//FINDING GCD
+// int gcd(int x, int y){
+//     int hcf = 1;
+//     for(int i=1;i<=min(x,y);i++){
+//         if(x%i ==0 && y%i==0){
+//             hcf=i;
+//         }
+//     }
+//     return hcf;
+// }
+// int main(){
+//     int a;
+//     cout<<"Enter first number: ";
+//     cin>>a;
+//     int b;
+//     cout<<"Enter second number: ";
+//     cin>>b;
+//     cout<<"GCD of these two numbers is " << gcd(a,b);
+// }
+
+//Betrter way to find gcd
+
 
 int gcd(int x, int y){
-    int hcf = 1;
-    for(int i=1;i<=min(x,y);i++){
-        if(x%i ==0 && y%i==0){
-            hcf=i;
+    int hcf=1;
+    for(int i =min(x,y); i>=1;i++){
+        if(x%i==0 && y%i==0){
+            hcf = i;
+            break;
         }
     }
     return hcf;
+    
 }
 int main(){
-    int a;
-    cout<<"Enter first number: ";
-    cin>>a;
-    int b;
-    cout<<"Enter second number: ";
-    cin>>b;
-    cout<<"GCD of these two numbers is " << gcd(a,b);
+    int n;
+    cout<<"Enter n: ";
+    cin>>n;
+    int m;
+    cout<<"Enter m: ";
+    cin>>m;
+
+    cout<<"gcd of num1 and num2 is "<<gcd(n,m);
+
 }
