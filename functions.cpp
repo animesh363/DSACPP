@@ -92,25 +92,25 @@ using namespace std;
 
 //with function 
 
-int fn(int x){
-    int fact=1;
-    for(int i=2;i<=x; i++){
-        fact = fact * i;
-    }
-    return fact ;
-}
-int main(){
-    int n, r;
-    cout <<"Enter n and r: ";
-    cin>>n >>r;
-    int nfact = fn(n);
-    int rfact = fn(r);
-    int nrfact = fn(n-r);
+// int fn(int x){
+//     int fact=1;
+//     for(int i=2;i<=x; i++){
+//         fact = fact * i;
+//     }
+//     return fact ;
+// }
+// int main(){
+//     int n, r;
+//     cout <<"Enter n and r: ";
+//     cin>>n >>r;
+//     int nfact = fn(n);
+//     int rfact = fn(r);
+//     int nrfact = fn(n-r);
 
-    int ncr = nfact / (rfact * nrfact);
-    cout<<ncr;
+//     int ncr = nfact / (rfact * nrfact);
+//     cout<<ncr;
 
-}
+// }
 
 
 //PERMUTATION:) number of ways to arrange or select objects from a given set of objects  nPr = n! / (n - r)!
@@ -217,5 +217,19 @@ int main(){
 // }
 
 
+//OPTIMISED PASCLE TRIANGLE
 
+int main(){
+    int n;
+    cout<<"Enter n: ";
+    cin>>n;
 
+    for(int i=0;i<=n;i++){
+        int curr = 1;
+        for(int j=0;j<=i;j++){
+            cout<<curr <<" ";
+            curr = curr * (i-j)/(j+1);
+        }
+        cout<<endl;
+    }
+}
