@@ -219,17 +219,54 @@ using namespace std;
 
 //OPTIMISED PASCLE TRIANGLE
 
-int main(){
-    int n;
-    cout<<"Enter n: ";
-    cin>>n;
+// int main(){
+//     int n;
+//     cout<<"Enter n: ";
+//     cin>>n;
 
-    for(int i=0;i<=n;i++){
-        int curr = 1;
-        for(int j=0;j<=i;j++){
-            cout<<curr <<" ";
-            curr = curr * (i-j)/(j+1);
+//     for(int i=0;i<=n;i++){
+//         int curr = 1;
+//         for(int j=0;j<=i;j++){
+//             cout<<curr <<" ";
+//             curr = curr * (i-j)/(j+1);
+//         }
+//         cout<<endl;
+//     }
+// }
+
+
+
+// void fn(int x = 5 , float y = 6.1){
+//     cout<<x <<" "<<y;
+// }
+// int main(){
+//     fn(4.3);  // 4 6.1
+// }
+
+
+// void fn(int x = 5 , bool y =false){
+//     cout<<x <<" "<<y;
+// }
+// int main(){
+//     fn(true);  // 1 0       1->true
+// }
+
+
+int gcd(int x, int y){
+    int hcf = 1;
+    for(int i=1;i<=min(x,y);i++){
+        if(x%i ==0 && y%i==0){
+            hcf=i;
         }
-        cout<<endl;
     }
+    return hcf;
+}
+int main(){
+    int a;
+    cout<<"Enter first number: ";
+    cin>>a;
+    int b;
+    cout<<"Enter second number: ";
+    cin>>b;
+    cout<<"GCD of these two numbers is " << gcd(a,b);
 }
