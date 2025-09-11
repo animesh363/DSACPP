@@ -299,18 +299,21 @@ using namespace std;
 
 
 //Q) Print the factorials of first n numbers
-int factorial(int n){
-    int fact=1;
-    for(int i=2;i<=n;i++){
-        fact =fact * i;
+void factorial(int n){
+    for(int i=1;i<=n;i++){
+        int fact=1;
+        for(int j=2;j<=i;j++){
+            fact =fact * j;
+        }
+        
+        cout<<"Factorial of "<< i <<" = " << fact << endl;
     }
-    return fact;
 }
 int main(){
     int n;
     cout<<"Enter number: ";
     cin>>n;
-    cout<<"Factorial of number = "<< factorial(n);
+    factorial(n);
 
 }
 
