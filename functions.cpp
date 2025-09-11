@@ -320,16 +320,29 @@ using namespace std;
 
 //betterfor factorial of first n 
 
-int main(){
-    int n;
-    cout<<"Enter a number: ";
-    cin>>n;
+// int main(){
+//     int n;
+//     cout<<"Enter a number: ";
+//     cin>>n;
     
-    int fact=1;
-    for(int i=1;i<=n;i++){
-        fact = fact*i;
-        cout<<"Factorial of " << i << " = " <<fact <<endl;
-    }
+//     int fact=1;
+//     for(int i=1;i<=n;i++){
+//         fact = fact*i;
+//         cout<<"Factorial of " << i << " = " <<fact <<endl;
+//     }
+// }
+
+//Q)  Swapping of 2 numbers 
+
+int main(){
+    int a, b;
+    cout<<"Enter a and b : ";
+    cin>>a >>b;
+    int temp = a;
+    a=b;
+    b=temp;
+    
+    cout<< a << " ," << b;
 }
 
 
