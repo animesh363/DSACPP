@@ -1,17 +1,38 @@
 #include <bits/stdc++.h>
 using namespace std;
 int main(){
-    cout<< sizeof(int) <<" bytes" <<endl;
-    cout<< sizeof(float) <<" bytes" <<endl;
-    cout<< sizeof(bool) <<" bytes" <<endl;
-    cout<< sizeof(long long) <<" bytes" <<endl;
-    cout<< sizeof(double) <<" bytes" <<endl;
-    cout<< sizeof(int) <<" bytes" <<endl;
+    // cout<< sizeof(int) <<" bytes" <<endl;
+    // cout<< sizeof(float) <<" bytes" <<endl;
+    // cout<< sizeof(bool) <<" bytes" <<endl;
+    // cout<< sizeof(long long) <<" bytes" <<endl;
+    // cout<< sizeof(double) <<" bytes" <<endl;
+    // cout<< sizeof(int) <<" bytes" <<endl;
 
 
 
-    int x = 4;
-    int* p =&x;
+    // int x = 4;
+    // int* p =&x;
 
-    cout<< &x;
+    // cout<< &x <<endl; //0x60ff08
+    // cout<< p <<endl;  //0x60ff08 same
+
+    // cout<< *p <<endl; // 4 (called derefrence oprator)
+
+    // *p = 8; //updated the value
+    // cout<<x;
+
+
+//q)sum of two number using pointers
+
+    int x,y;
+    cout<<"Enter two num: ";
+    cin>>x>>y;
+
+
+    int *p1 = &x;
+    int *p2 = &y;
+
+    cout<<"Sum = " << *p1 + *p2;
+
+    
 }
