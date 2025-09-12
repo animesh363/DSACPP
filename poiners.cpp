@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-int main(){
+// int main(){
     // cout<< sizeof(int) <<" bytes" <<endl;
     // cout<< sizeof(float) <<" bytes" <<endl;
     // cout<< sizeof(bool) <<" bytes" <<endl;
@@ -24,15 +24,44 @@ int main(){
 
 //q)sum of two number using pointers
 
-    int x,y;
-    cout<<"Enter two num: ";
-    cin>>x>>y;
+//     int x,y;
+//     cout<<"Enter two num: ";
+//     cin>>x>>y;
 
 
-    int *p1 = &x;
-    int *p2 = &y;
+//     int *p1 = &x;
+//     int *p2 = &y;
 
-    cout<<"Sum = " << *p1 + *p2;
+//     cout<<"Sum = " << *p1 + *p2;
 
     
+// }
+
+
+// int main(){
+//     int x=10, y=12;
+//     int *p1 = &x, *p2 = y;
+//     cout<< *p1 ; 
+// }
+
+//SWAPING WITH POINTERS
+
+void swap(int *x, int *y){
+    int temp = *x;
+    *x = *y;
+    *y=temp;
+    
 }
+int main(){
+    int a,b;
+    cout<<"Enter 2 numbers: ";
+    cin>>a>>b;
+    swap(&a,&b);
+    cout<< "Swaped number = " << a <<" " <<b;
+}
+
+
+
+
+
+
