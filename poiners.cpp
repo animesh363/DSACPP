@@ -46,22 +46,51 @@ using namespace std;
 
 //SWAPING WITH POINTERS
 
-void swap(int *x, int *y){
-    int temp = *x;
-    *x = *y;
-    *y=temp;
+// void swap(int *x, int *y){
+//     int temp = *x;
+//     *x = *y;
+//     *y=temp;
     
+// }
+// int main(){
+//     int a,b;
+//     cout<<"Enter 2 numbers: ";
+//     cin>>a>>b;
+//     swap(&a,&b);
+//     cout<< "Swaped number = " << a <<" " <<b;
+// }
+
+
+// void swap(int *x, int *y){
+//     int temp = *x;
+//     *x = *y;
+//     *y = temp;
+//     return;
+// }
+// int main(){
+//     int a=6, b=8;
+//     int *x = &a;
+//     int *y = &b;
+//     swap(x,y);
+//     cout<< "Swaped number: "<< a <<" "<<b;
+
+// }
+
+//ALIAS METHOD
+
+void swap(int &a, int &b){
+    int temp = a;
+    a = b;
+    b = temp;
+    return;
 }
 int main(){
     int a,b;
-    cout<<"Enter 2 numbers: ";
+    cout<<"Enter two number: ";
     cin>>a>>b;
-    swap(&a,&b);
-    cout<< "Swaped number = " << a <<" " <<b;
+    swap(a,b);
+    cout<< "Swaped number: "<< a <<" "<<b;
 }
-
-
-
 
 
 
