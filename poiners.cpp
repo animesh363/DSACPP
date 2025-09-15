@@ -112,9 +112,18 @@ using namespace std;
 
 //predict the output
 
+// int main(){
+//     int a = 15;
+//     int *ptr = &a;
+//     int b = ++(*ptr);
+//     cout<< a << " " <<b; //16 16
+// }
+
+
 int main(){
-    int a = 15;
-    int *ptr = &a;
-    int b = ++(*ptr);
-    cout<< a << " " <<b; //16 16
+    int num;
+    cout<<"Enter a number: ";
+    cin>>num;
+    int ld = num % 10;
+    cout<<"last digit = " <<ld;
 }
