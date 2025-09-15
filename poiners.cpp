@@ -78,19 +78,43 @@ using namespace std;
 
 //ALIAS METHOD
 
-void swap(int &a, int &b){
-    int temp = a;
-    a = b;
-    b = temp;
-    return;
-}
+// void swap(int &a, int &b){  //pass by refrence
+//     int temp = a;
+//     a = b;
+//     b = temp;
+//     return;
+// }
+// int main(){
+//     int a,b;
+//     cout<<"Enter two number: ";
+//     cin>>a>>b;
+//     swap(a,b);
+//     cout<< "Swaped number: "<< a <<" "<<b;
+// }
+
+
+// int main(){
+    // int x =5;
+    // int *ptr = &x;
+    // cout<< ptr <<endl; //0x60ff08
+    // ptr = ptr + 1;
+    // cout<< ptr <<endl;//0x60ff0c  -> it is giving memory address by adding 4 bites
+ 
+
+
+
+    // int x = 5;
+    // int *ptr = &x;
+    // cout<< *ptr <<endl;
+    // (*ptr)++; // *ptr -> wrong
+    // cout<< *ptr <<endl;
+// }
+
+//predict the output
+
 int main(){
-    int a,b;
-    cout<<"Enter two number: ";
-    cin>>a>>b;
-    swap(a,b);
-    cout<< "Swaped number: "<< a <<" "<<b;
+    int a = 15;
+    int *ptr = &a;
+    int b = ++(*ptr);
+    cout<< a << " " <<b; //16 16
 }
-
-
-
