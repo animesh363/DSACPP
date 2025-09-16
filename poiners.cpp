@@ -120,10 +120,34 @@ using namespace std;
 // }
 
 
+// int main(){
+//     int num;
+//     cout<<"Enter a number: ";
+//     cin>>num;
+//     int ld = num % 10;
+//     cout<<"last digit = " <<ld;
+// }
+
+
+
+
+void find(int n, int *ptr1, int *ptr2){
+    *ptr2 = n%10;
+    while(n>9){
+        n =  n / 10;
+    }
+    *ptr1 = n;
+
+}
 int main(){
-    int num;
-    cout<<"Enter a number: ";
-    cin>>num;
-    int ld = num % 10;
-    cout<<"last digit = " <<ld;
+    int n;
+    cout<<"Enter value of n: ";
+    cin>>n;
+    int fd, ld;
+    int *ptr1 = &fd;
+    int *ptr2 = &ld;
+
+    find(n, ptr1, ptr2);
+    cout<< fd <<" "<<ld;
+
 }
