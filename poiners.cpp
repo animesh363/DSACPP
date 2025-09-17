@@ -129,7 +129,7 @@ using namespace std;
 // }
 
 
-
+//FINDING First and Last digit 
 
 void find(int n, int *ptr1, int *ptr2){
     *ptr2 = n%10;
@@ -137,7 +137,6 @@ void find(int n, int *ptr1, int *ptr2){
         n =  n / 10;
     }
     *ptr1 = n;
-
 }
 int main(){
     int n;
@@ -148,6 +147,6 @@ int main(){
     int *ptr2 = &ld;
 
     find(n, ptr1, ptr2);
-    cout<< fd <<" "<<ld;
+    cout<<"First digit: "<< fd <<" "<< "Last digit: " << ld;
 
 }

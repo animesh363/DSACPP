@@ -1,22 +1,16 @@
-#include <iostream>
-using namespace std;
-//    ----PATTERNS----    //
-
-void print1(int n){
-    for(int i =0;i<n;i++){
-        for(int j=0;j<n;j++){
-            cout<<"* ";
-        }
-        cout<<endl;
-    }
+int sum(int a, int b){
+    int c = a + b;
+    return c;
 }
-int main(){
-    int t;
-    cin>>t; //for testcases
 
-    for(int i=0;i<t;i++){
-    int n;
-    cin>>n;
-    print1(n);
-    }
+
+int main(){
+    int num1, num2;
+    cout<<"Enter num1 : ";
+    cin>> num1;
+    cout<<"Enter num2: ";
+    cin>>num2;
+    cout<<"The Sum is "<<sum(num1, num2);
+
+    return 0;
 }
