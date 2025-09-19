@@ -29,7 +29,7 @@ int main(){
 
         int n;
         cout<<"Enter no of student: ";
-        cin>>n;
+        cin>>n; 
 
         int marks[n];
         cout<<"Enter marks: ";
