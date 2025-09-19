@@ -27,23 +27,30 @@ int main(){
     number. [roll number here refers to the index of the
     array.] */
 
-        int n;
-        cout<<"Enter no of student: ";
-        cin>>n; 
+        // int n;
+        // cout<<"Enter no of student: ";
+        // cin>>n; 
 
-        int marks[n];
-        cout<<"Enter marks: ";
+        // int marks[n];
+        // cout<<"Enter marks: ";
 
-        for(int i=0;i<n;i++){
-            cin>>marks[i];
-        }
-        cout<<"Students having marks below 35 are : "; //(roll number is same as indexes of array)
+        // for(int i=0;i<n;i++){
+        //     cin>>marks[i];
+        // }
+        // cout<<"Students having marks below 35 are : "; //(roll number is same as indexes of array)
 
-        for(int i=0;i<n;i++){
-            if(marks[i]<35){
-                cout<< i<<" ";
-            }
-        }
+        // for(int i=0;i<n;i++){
+        //     if(marks[i]<35){
+        //         cout<< i<<" ";
+        //     }
+        // }
+        //finding size
+
+        int arr[] = {1,2,3,4,5,6,7,8,9,0,9,8,7,6,5,4,3,2,1};
+
+        int Size = sizeof(arr) / sizeof(arr[0]); // b'z 1 int = 4 byte so full array ka size divided by 1 element ka size
+        cout<<"Size of Array: " <<Size;
+
     
 
 
