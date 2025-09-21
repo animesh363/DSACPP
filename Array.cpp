@@ -84,13 +84,12 @@ int main(){
     int y;
     cout<<"Enter element you want to find: ";
     cin>>y;
-    int index;
+    bool flag = false; //check mark
     for(int i=0;i<n;i++){
-
-        if (arr[i] == y) cout<<"Element is present at "<< i << " th index.";
-        else "Element is not present";
-        
+        if (arr[i] == y) flag=true;    
     }
+    if (flag == true) cout<<"Your element is found";
+    else cout<<"Your element is not found";
 
     // cout<<"Your element found at " <<index<<" index";
     
