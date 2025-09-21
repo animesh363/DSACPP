@@ -111,6 +111,29 @@ int main(){
 
 //Q)Find Second largest element in the array
 
+    // int n;
+    // cout<<"Enter the size of array: ";
+    // cin>>n;
+    // int arr[n];
+    // cout<<"Enter the elements of the array: ";
+    // for (int i=0;i<n;i++){
+    //     cin>>arr[i];
+    // }
+    // int max = INT_MIN; // eka bahut chhoti value assign kar diye
+    // for(int i=1;i<n;i++){
+    //     if(max<arr[i]) max=arr[i];
+    // }
+    // int Smax = INT_MIN;
+    // for(int i=0;i<n;i++){
+    //     if(Smax < arr[i] && arr[i] != max){
+    //         Smax = arr[i];
+    //     }
+    // }
+    // cout<<"Your Second largest element = "<<Smax;
+
+
+
+//Q)find elemenr greator than x
     int n;
     cout<<"Enter the size of array: ";
     cin>>n;
@@ -119,18 +142,14 @@ int main(){
     for (int i=0;i<n;i++){
         cin>>arr[i];
     }
-    int max = INT_MIN; // eka bahut chhoti value assign kar diye
-    for(int i=1;i<n;i++){
-        if(max<arr[i]) max=arr[i];
+    int y;
+    cout <<"Enter y";
+    cin>>y;
+    int count = 0;
+    for (int i=0;i<n;i++){
+        if(arr[i] >y) count++;
     }
-    int Smax = INT_MIN;
-    for(int i=0;i<n;i++){
-        if(Smax < arr[i] && arr[i] != max){
-            Smax = arr[i];
-        }
-    }
-    cout<<"Your Second largest element = "<<Smax;
-
+    cout<<"No of elements: "<<count;
 
 
 
