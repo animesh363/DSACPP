@@ -54,19 +54,46 @@ int main(){
     
 
 //Ques : Calculate the sum of all the elements in the given array.
+    // int n;
+    // cout<<"Enter n: ";
+    // cin>>n;
+    // int arr[n];
+    // cout<<"Elements af array: ";
+    // for(int i=0;i<n;i++){
+    //     cin>>arr[i];
+    // }
+    // int sum=0;
+    // for(int i=0;i<n;i++){
+    //     sum = sum + arr[i];
+    // }
+    // cout<<"Sum = "<< sum;
+
+
+
+//Ques : Find the element x in the array . Take array and x as input.
+
     int n;
-    cout<<"Enter n: ";
-    cin>>n;
+    cout<<"Enter size of arr: ";
+    cin>>n ;
+
     int arr[n];
-    cout<<"Elements af array: ";
+    cout<<"Enter the element of arr: ";
     for(int i=0;i<n;i++){
         cin>>arr[i];
     }
-    int sum=0;
+    int y;
+    cout<<"Enter element you want to find: ";
+    cin>>y;
+    int index;
     for(int i=0;i<n;i++){
-        sum = sum + arr[i];
+
+        if (arr[i] == y) cout<<"Element is present at "<< i << " th index.";
+        else "Element is not present";
+        
     }
-    cout<<"Sum = "<< sum;
+
+    // cout<<"Your element found at " <<index<<" index";
+    
     
 
 
