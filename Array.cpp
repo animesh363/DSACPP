@@ -72,28 +72,68 @@ int main(){
 
 //Ques : Find the element x in the array . Take array and x as input.
 
-    int n;
-    cout<<"Enter size of arr: ";
-    cin>>n ;
+    // int n;
+    // cout<<"Enter size of arr: ";
+    // cin>>n ;
 
+    // int arr[n];
+    // cout<<"Enter the element of arr: ";
+    // for(int i=0;i<n;i++){
+    //     cin>>arr[i];
+    // }
+    // int y;
+    // cout<<"Enter element you want to find: ";
+    // cin>>y;
+    // bool flag = false; //check mark
+    // for(int i=0;i<n;i++){
+    //     if (arr[i] == y) flag=true;    
+    // }
+    // if (flag == true) cout<<"Your element is found";
+    // else cout<<"Your element is not found";
+
+    
+    
+//Q)find the maximum value out of all elements in the array
+
+    // int n;
+    // cout<<"Enter the size of array: ";
+    // cin>>n;
+    // int arr[n];
+    // cout<<"Enter the elements of the array: ";
+    // for (int i=0;i<n;i++){
+    //     cin>>arr[i];
+    // }
+    // int max = arr[0];
+    // for(int i=1;i<n;i++){
+    //     if (max<arr[i]) max=arr[i];
+    // }
+    // cout<<"Maximum Element = "<<max;
+
+//Q)Find Second largest element in the array
+
+    int n;
+    cout<<"Enter the size of array: ";
+    cin>>n;
     int arr[n];
-    cout<<"Enter the element of arr: ";
-    for(int i=0;i<n;i++){
+    cout<<"Enter the elements of the array: ";
+    for (int i=0;i<n;i++){
         cin>>arr[i];
     }
-    int y;
-    cout<<"Enter element you want to find: ";
-    cin>>y;
-    bool flag = false; //check mark
-    for(int i=0;i<n;i++){
-        if (arr[i] == y) flag=true;    
+    int max = INT_MIN; // eka bahut chhoti value assign kar diye
+    for(int i=1;i<n;i++){
+        if(max<arr[i]) max=arr[i];
     }
-    if (flag == true) cout<<"Your element is found";
-    else cout<<"Your element is not found";
+    int Smax = INT_MIN;
+    for(int i=0;i<n;i++){
+        if(Smax < arr[i] && arr[i] != max){
+            Smax = arr[i];
+        }
+    }
+    cout<<"Your Second largest element = "<<Smax;
 
-    // cout<<"Your element found at " <<index<<" index";
-    
-    
+
+
+
 
 
 }
