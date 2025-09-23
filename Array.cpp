@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int main(){
+// int main(){
     // int arr[5] = {1,2,3,4,5 };
     // // cout<<arr[0];
     // for(int i=0;i<5;i++){
@@ -134,25 +134,44 @@ int main(){
 
 
 //Q)find elemenr greator than x
-    int n;
-    cout<<"Enter the size of array: ";
-    cin>>n;
-    int arr[n];
-    cout<<"Enter the elements of the array: ";
-    for (int i=0;i<n;i++){
-        cin>>arr[i];
+    // int n;
+    // cout<<"Enter the size of array: ";
+    // cin>>n;
+    // int arr[n];
+    // cout<<"Enter the elements of the array: ";
+    // for (int i=0;i<n;i++){
+    //     cin>>arr[i];
+    // }
+    // int y;
+    // cout <<"Enter y";
+    // cin>>y;
+    // int count = 0;
+    // for (int i=0;i<n;i++){
+    //     if(arr[i] >y) count++;
+    // }
+    // cout<<"No of elements: "<<count;
+
+// } \\yahan main khatam huaa
+
+
+// ______________________________________________________________________________________________
+//Passing array to a function
+
+
+void print(int a[]){
+    for(int i=0;i<=4;i++){
+        cout<<a[i] <<" ";
     }
-    int y;
-    cout <<"Enter y";
-    cin>>y;
-    int count = 0;
-    for (int i=0;i<n;i++){
-        if(arr[i] >y) count++;
-    }
-    cout<<"No of elements: "<<count;
-
-
-
-
+    cout<<endl;
+    return;
+}
+void change(int b[]){
+    b[0]=100;
+}
+int main(){
+    int arr[5] = {1,2,3,4,5};
+    print(arr);
+    change(arr);  //ishne change function ko call laga ke change kar diya
+    print(arr);
 
 }
