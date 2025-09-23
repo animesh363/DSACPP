@@ -158,20 +158,41 @@ using namespace std;
 //Passing array to a function
 
 
-void print(int a[]){
+// void print(int a[]){
+//     for(int i=0;i<=4;i++){
+//         cout<<a[i] <<" ";
+//     }
+//     cout<<endl;
+//     return;
+// }
+// void change(int b[]){
+//     b[0]=100;
+// }
+// int main(){
+//     int arr[5] = {1,2,3,4,5};
+//     print(arr);
+//     change(arr);  //ishne change function ko call laga ke change kar
+//     print(arr);
+
+// }
+
+void print(int a[],int size){
+    
     for(int i=0;i<=4;i++){
         cout<<a[i] <<" ";
     }
     cout<<endl;
     return;
 }
-void change(int b[]){
+void change(int b[],int size){
     b[0]=100;
 }
 int main(){
     int arr[5] = {1,2,3,4,5};
-    print(arr);
-    change(arr);  //ishne change function ko call laga ke change kar diya
-    print(arr);
+
+    int size = sizeof(arr)/sizeof(arr[0]);
+    print(arr,size);
+    change(arr,size);  //ishne change function ko call laga ke change kar
+    print(arr,size);
 
 }
