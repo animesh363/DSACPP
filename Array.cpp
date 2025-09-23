@@ -176,23 +176,36 @@ using namespace std;
 
 // }
 
-void print(int a[],int size){
+// void print(int a[],int size){
     
-    for(int i=0;i<=4;i++){
-        cout<<a[i] <<" ";
-    }
-    cout<<endl;
-    return;
-}
-void change(int b[],int size){
-    b[0]=100;
-}
-int main(){
-    int arr[5] = {1,2,3,4,5};
+//     for(int i=0;i<=4;i++){
+//         cout<<a[i] <<" ";
+//     }
+//     cout<<endl;
+//     return;
+// }
+// void change(int b[],int size){
+//     b[0]=100;
+// }
+// int main(){
+//     int arr[5] = {1,2,3,4,5};
 
-    int size = sizeof(arr)/sizeof(arr[0]);
-    print(arr,size);
-    change(arr,size);  //ishne change function ko call laga ke change kar
-    print(arr,size);
+//     int size = sizeof(arr)/sizeof(arr[0]);
+//     print(arr,size);
+//     change(arr,size);  //ishne change function ko call laga ke change kar
+//     print(arr,size);
+
+// }
+
+//Pointer array
+int main(){
+    int arr[] = {1,2,3,4,5};
+
+    int *ptr = arr;//correct way for array storing address
+    cout<<ptr<<endl;//0x60fef0
+    cout<<ptr[0] <<endl;//1
+    for(int i=0;i<5;i++){
+        cout<<ptr[i]  <<" ";
+    }
 
 }
