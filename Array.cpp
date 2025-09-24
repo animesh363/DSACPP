@@ -206,6 +206,9 @@ int main(){
     cout<<ptr[0] <<endl;//1
     for(int i=0;i<5;i++){
         cout<<ptr[i]  <<" ";
+        ptr++;
     }
 
 }
+
+//goint toward array and pointer
