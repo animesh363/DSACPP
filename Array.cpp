@@ -133,7 +133,7 @@ using namespace std;
 
 
 
-//Q)find elemenr greator than x
+//Q)find element greator than x
     // int n;
     // cout<<"Enter the size of array: ";
     // cin>>n;
