@@ -2,14 +2,14 @@
 using namespace std;
 
 int main(){
-    vector <int> v;
-    v.push_back(1);
-    v.push_back(2);
-    v.push_back(3);
-    v.push_back(4);
-    v.push_back(5);
+    // vector <int> v;
+    // v.push_back(1);
+    // v.push_back(2);
+    // v.push_back(3);
+    // v.push_back(4);
+    // v.push_back(5);
 
-    v[4] = 9; //updating the value
+    // v[4] = 9; //updating the value
      
 
     // cout<<v[0]<<" ";
@@ -19,18 +19,38 @@ int main(){
     // cout<<v[4]<<" ";
 
     
-    for(int i=0;i<v.size();i++){ //we can print value with loop as well
-        cout<<v[i] << " ";
-    }
+    // for(int i=0;i<v.size();i++){ //we can print value with loop as well
+    //     cout<<v[i] << " ";
+    // }
 
-    cout<<"\nCurrent size = " << v.size();
-    cout<<"\nCurrent capacity = " << v.capacity();
+    // cout<<"\nCurrent size = " << v.size();
+    // cout<<"\nCurrent capacity = " << v.capacity();
 
-    v.pop_back(); // removing last element
+    // v.pop_back(); // removing last element
     
 
     // Size = how many elements are in the vector right now.
 
     // Capacity = how many elements the vector can hold without allocating more memory.
+
+
+    // vector <int> v(10,7); //size 10 and each element has value 7
+    // cout<<v[3] <<endl;
+    // for(int i=0;i<v.size();i++){
+    //     cout<<v[i] <<" ";
+    // }
+
+    int n;
+    cout<<"Enter size of vector: ";
+    cin>>n;
+    vector <int> v(n);
+    cout<<"Enter Elements of vector: ";
+    for(int i=0;i<v.size();i++){
+        cin>>v[i];
+    }
+    for(int i=0;i<v.size();i++){
+        cout<<v[i]<<" ";
+    }
+
     
 }
