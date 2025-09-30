@@ -40,17 +40,29 @@ int main(){
     //     cout<<v[i] <<" ";
     // }
 
-    int n;
-    cout<<"Enter size of vector: ";
-    cin>>n;
-    vector <int> v(n);
-    cout<<"Enter Elements of vector: ";
-    for(int i=0;i<v.size();i++){
-        cin>>v[i];
+    // int n;
+    // cout<<"Enter size of vector: ";
+    // cin>>n;
+    // vector <int> v(n);
+    // cout<<"Enter Elements of vector: ";
+    // for(int i=0;i<v.size();i++){
+    //     cin>>v[i];
+    // }
+    // for(int i=0;i<v.size();i++){
+    //     cout<<v[i]<<" ";
+    // }
+
+    //Without giving size
+    vector<int> v;
+    for(int i=0;i<5;i++){
+        int x;
+        cin>>x;
+        v.push_back(x);
     }
-    for(int i=0;i<v.size();i++){
+    for(int i=0;i<5;i++){
         cout<<v[i]<<" ";
     }
+
 
     
 }
