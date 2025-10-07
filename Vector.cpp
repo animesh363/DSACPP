@@ -89,27 +89,50 @@ using namespace std;
      
 // }
 
-void change(vector<int>&a){ //& ->ampercent oprator
-    a[0]=100;
-}
-int main(){
+// void change(vector<int>&a){ //& ->ampercent oprator
+//     a[0]=100;
+// }
+// int main(){
+//     vector <int> v;
+//     v.push_back(4);
+//     v.push_back(9);
+//     v.push_back(1);
+//     v.push_back(7);
+    
+//     for (int i=0;i<v.size();i++){
+//         cout<<v.at(i)<<" ";
+//     }
+//     cout<<endl;
+
+
+//     change(v); //jab refrence tabhi change hoga nahi to wo naya array banata hai
+
+//     for (int i=0;i<v.size();i++){
+//         cout<<v.at(i)<<" ";
+//     }
+//     cout<<endl;
+
+// }
+
+
+//Q)Find the last occurrence of x in the array.
+int  main(){
     vector <int> v;
-    v.push_back(4);
-    v.push_back(9);
+    
     v.push_back(1);
     v.push_back(7);
-    
-    for (int i=0;i<v.size();i++){
-        cout<<v.at(i)<<" ";
+    v.push_back(1);
+    v.push_back(3);
+    v.push_back(7);
+    v.push_back(8);
+    v.push_back(7);
+    v.push_back(9);
+    int target =7;
+
+    int idx =-1;
+    for(int i=0;i<v.size();i++){
+        if(v[i] == target) idx = i;
     }
-    cout<<endl;
 
-
-    change(v); //jab refrence tabhi change hoga nahi to wo naya array banata hai
-
-    for (int i=0;i<v.size();i++){
-        cout<<v.at(i)<<" ";
-    }
-    cout<<endl;
-
+    cout<<"occurrence of x : " << idx;
 }
