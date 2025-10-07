@@ -117,22 +117,59 @@ using namespace std;
 
 //Q)Find the last occurrence of x in the array.
 int  main(){
-    vector <int> v;
-    
-    v.push_back(1);
-    v.push_back(7);
-    v.push_back(1);
-    v.push_back(3);
-    v.push_back(7);
-    v.push_back(8);
-    v.push_back(7);
-    v.push_back(9);
-    int target =7;
+//     vector <int> v;
+//     v.push_back(1);
+//     v.push_back(7);
+//     v.push_back(1);
+//     v.push_back(3);
+//     v.push_back(7);
+//     v.push_back(8);
+//     v.push_back(7);
+//     v.push_back(9);
 
-    int idx =-1;
-    for(int i=0;i<v.size();i++){
-        if(v[i] == target) idx = i;
+//     int target =7;
+
+//     int idx =-1;
+//     //with forward loop
+
+//     // for(int i=0;i<v.size();i++){
+//     //     if(v[i] == target) idx = i;
+//     // }
+
+//     //with backward loop
+//     for(int i=v.size()-1;i>=0;i--){
+//         if(v[i] == target ){
+//             idx = i;
+//             break;
+//         } 
+//     }
+
+
+//     cout<<"occurrence of x : " << idx;
+
+
+    //Q) Find the doublet in the Array whose sum is equal to the given value x.(Two sum problem)
+    int x;
+    cout<<"Enter the target: ";
+    cin>>x;
+    int n;
+    cout<<"Enter size of vector: ";
+    cin>>n;
+    vector<int>v;
+
+    for(int i=0;i<n;i++){
+        int q;
+        cin>>q;
+        v.push_back(q);
     }
 
-    cout<<"occurrence of x : " << idx;
+    for(int i=0;i<=v.size()-1;i++){
+        for(int j=0;j<=v.size()-1;j++){
+            if(v[i] + v[j] == x){
+                cout<<"(" <<i<<", "<<j<<")"<<endl;
+            }
+        }
+    }
+
+
 }
