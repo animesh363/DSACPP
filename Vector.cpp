@@ -149,27 +149,52 @@ int  main(){
 
 
     //Q) Find the doublet in the Array whose sum is equal to the given value x.(Two sum problem)
-    int x;
-    cout<<"Enter the target: ";
-    cin>>x;
+    // int x;
+    // cout<<"Enter the target: ";
+    // cin>>x;
+    // int n;
+    // cout<<"Enter size of vector: ";
+    // cin>>n;
+    // vector<int>v;
+
+    // for(int i=0;i<n;i++){
+    //     int q;
+    //     cin>>q;
+    //     v.push_back(q);
+    // }
+
+    // for(int i=0;i<=v.size()-1;i++){
+    //     for(int j=0;j<=v.size()-1;j++){
+    //         if(v[i] + v[j] == x){
+    //             cout<<"(" <<i<<", "<<j<<")"<<endl;
+    //         }
+    //     }
+    // }
+
+
+
+    //Q) Write a program to copy the contents of one array into another in the reverse order.
+
+    
     int n;
     cout<<"Enter size of vector: ";
     cin>>n;
-    vector<int>v;
+    vector<int>v(n);
+    
+    for(int i=0;i<n;i++){
+       cin>>v[i];
+    }
+
+   vector<int> v2(n);
 
     for(int i=0;i<n;i++){
-        int q;
-        cin>>q;
-        v.push_back(q);
-    }
-
-    for(int i=0;i<=v.size()-1;i++){
-        for(int j=0;j<=v.size()-1;j++){
-            if(v[i] + v[j] == x){
-                cout<<"(" <<i<<", "<<j<<")"<<endl;
-            }
-        }
+        v2[i]=v[n-i-1];
+        
     }
 
 
+    // cout<<"Copied vectror: " << display(v2);
+    for(int i=0;i<n;i++){
+       cout<<v2[i]<<" ";
+    }
 }
