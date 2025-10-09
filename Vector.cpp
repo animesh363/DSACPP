@@ -226,13 +226,28 @@ int main(){
     int i=0;
     int j=v.size()-1;
 
+    // while(i<=j){
+    //     // int temp = v[i];
+    //     // v[i]=v[j];
+    //     // v[j] = temp;
+    //     i++;
+    //     j--;
+    // }
+    
+    //using swap
     while(i<=j){
-        int temp = v[i];
-        v[i]=v[j];
-        v[j] = temp;
+        swap(v[i],v[j]);
         i++;
         j--;
     }
+
+    //Using for loop***
+    // for(int i=0,j=v.size()-1;i<=j;i++,j--){
+    //     int temp = v[i];
+    //     v[i]=v[j];
+    //     v[j]=temp;
+    // }
+    
 
     cout<<"After Reversal: ";
     display(v);
