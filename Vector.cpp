@@ -116,7 +116,7 @@ using namespace std;
 
 
 //Q)Find the last occurrence of x in the array.
-int  main(){
+// int  main(){
 //     vector <int> v;
 //     v.push_back(1);
 //     v.push_back(7);
@@ -176,25 +176,72 @@ int  main(){
     //Q) Write a program to copy the contents of one array into another in the reverse order.
 
     
-    int n;
-    cout<<"Enter size of vector: ";
-    cin>>n;
-    vector<int>v(n);
+//     int n;
+//     cout<<"Enter size of vector: ";
+//     cin>>n;
+//     vector<int>v(n);
     
-    for(int i=0;i<n;i++){
-       cin>>v[i];
-    }
+//     for(int i=0;i<n;i++){
+//        cin>>v[i];
+//     }
 
-   vector<int> v2(n);
+//    vector<int> v2(n);
 
-    for(int i=0;i<n;i++){
-        v2[i]=v[n-i-1];
+//     for(int i=0;i<n;i++){
+//         v2[i]=v[n-i-1];
         
-    }
+//     }
 
 
-    // cout<<"Copied vectror: " << display(v2);
-    for(int i=0;i<n;i++){
-       cout<<v2[i]<<" ";
+//     // cout<<"Copied vectror: " << display(v2);
+//     for(int i=0;i<n;i++){
+//        cout<<v2[i]<<" ";
+//     }
+
+
+// }
+
+//Q)Reverse array without using extra array(using Two pointer method)
+
+void display(vector<int>&a){
+    for(int i=0;i<a.size();i++){
+        cout<<a[i]<<" ";
     }
+    cout<<endl;
 }
+
+int main(){
+    vector<int> v;
+    v.push_back(1);
+    v.push_back(3);
+    v.push_back(5);
+    v.push_back(6);
+    v.push_back(7);
+    v.push_back(8);
+    v.push_back(4);
+
+    cout<<"Before Reversal: ";
+    display(v);
+
+    int i=0;
+    int j=v.size()-1;
+
+    while(i<=j){
+        int temp = v[i];
+        v[i]=v[j];
+        v[j] = temp;
+        i++;
+        j--;
+    }
+
+    cout<<"After Reversal: ";
+    display(v);
+
+}
+
+
+
+
+
+
+
