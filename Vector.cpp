@@ -403,6 +403,11 @@ using namespace std;
 
         }
     }
+    void display(vector<int> &a){
+        for(int i=0;i<a.size();i++){
+            cout<<a[i]<<" ";
+        }
+    }
     int main(){
         vector<int>v;
         v.push_back(-1);
@@ -415,9 +420,13 @@ using namespace std;
         v.push_back(-7);
 
         swap01(v);
-        for(int i=0;i<v.size();i++){
-            cout<<v[i]<<" ";
-        }
+        display(v);
+        cout<<endl;
+        
+        sort(v.begin(),v.end());
+        cout<<"Shorted array: ";
+        display(v);
+        
     }
 
 
