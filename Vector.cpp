@@ -388,45 +388,92 @@ using namespace std;
     // }
 
 
-    void swap01(vector<int>&a){
+    // void swap01(vector<int>&a){
+    //     int i=0;
+    //     int j=a.size()-1;
+
+    //     while(i<j){
+    //         if(a[i]<0) i++;
+    //         else if(a[j]>0) j--;
+    //         else if(a[i]>0 && a[j]<0) {
+    //             swap(a[i],a[j]);
+    //             i++;
+    //             j--;
+    //         }
+
+    //     }
+    // }
+    // void display(vector<int> &a){
+    //     for(int i=0;i<a.size();i++){
+    //         cout<<a[i]<<" ";
+    //     }
+    // }
+    // int main(){
+    //     vector<int>v;
+    //     v.push_back(-1);
+    //     v.push_back(3);
+    //     v.push_back(-1);
+    //     v.push_back(-3);
+    //     v.push_back(8);
+    //     v.push_back(4);
+    //     v.push_back(-1);
+    //     v.push_back(-7);
+
+    //     swap01(v);
+    //     display(v);
+    //     cout<<endl;
+        
+    //     sort(v.begin(),v.end());
+    //     cout<<"Shorted array: ";
+    //     display(v);
+        
+    // }
+    void merge(vector<int>&v1 , vector<int>&v2, vector<int>&temp){
         int i=0;
-        int j=a.size()-1;
+        int j=0;
+        int k=0;
+        int m=v1.size();
+        int n=v2.size();
 
-        while(i<j){
-            if(a[i]<0) i++;
-            else if(a[j]>0) j--;
-            else if(a[i]>0 && a[j]<0) {
-                swap(a[i],a[j]);
+        while(i<m && j<n){
+            if(v1[i]<v2[j]){
+                temp[k]=v1[i];
                 i++;
-                j--;
+            }else{
+                temp[k]=v2[j];
+                j++;
             }
+            k++;
+        }
+        while(i<m){
+            temp[k]=v1[i];
+            i++;
+            k++;
+        }
+        while(j<n){
+            temp[k]=v2[j];
+            j++;
+            k++;
+        }
 
-        }
-    }
-    void display(vector<int> &a){
-        for(int i=0;i<a.size();i++){
-            cout<<a[i]<<" ";
-        }
+        
     }
     int main(){
-        vector<int>v;
-        v.push_back(-1);
-        v.push_back(3);
-        v.push_back(-1);
-        v.push_back(-3);
-        v.push_back(8);
-        v.push_back(4);
-        v.push_back(-1);
-        v.push_back(-7);
+        vector<int> v1={1,4,5,8}, v2={2,3,6,7,10,12};
+        int m=v1.size();
+        int n=v2.size();
+        vector<int> temp(n+m);
 
-        swap01(v);
-        display(v);
-        cout<<endl;
-        
-        sort(v.begin(),v.end());
-        cout<<"Shorted array: ";
-        display(v);
-        
+        merge(v1, v2, temp);
+
+        cout<<"Shorted Array: ";
+        for(int i=0;i<temp.size();i++){
+            cout<<temp[i]<<" ";
+        }
+
+
+
+
     }
 
 
