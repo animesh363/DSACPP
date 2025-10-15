@@ -428,52 +428,61 @@ using namespace std;
     //     display(v);
         
     // }
-    void merge(vector<int>&v1 , vector<int>&v2, vector<int>&temp){
-        int i=0;
-        int j=0;
-        int k=0;
-        int m=v1.size();
-        int n=v2.size();
+    // void merge(vector<int>&v1 , vector<int>&v2, vector<int>&temp){
+    //     int i=0;
+    //     int j=0;
+    //     int k=0;
+    //     int m=v1.size();
+    //     int n=v2.size();
 
-        while(i<m && j<n){
-            if(v1[i]<v2[j]){
-                temp[k]=v1[i];
-                i++;
-            }else{
-                temp[k]=v2[j];
-                j++;
+    //     while(i<m && j<n){
+    //         if(v1[i]<v2[j]){
+    //             temp[k]=v1[i];
+    //             i++;
+    //         }else{
+    //             temp[k]=v2[j];
+    //             j++;
+    //         }
+    //         k++;
+    //     }
+    //     while(i<m){
+    //         temp[k]=v1[i];
+    //         i++;
+    //         k++;
+    //     }
+    //     while(j<n){
+    //         temp[k]=v2[j];
+    //         j++;
+    //         k++;
+    //     }   
+    // }
+    // int main(){
+    //     vector<int> v1={1,4,5,8}, v2={2,3,6,7,10,12};
+    //     vector<int> temp(4+6);
+    //     merge(v1, v2, temp);
+    //     cout<<"Shorted Array: ";
+    //     for(int i=0;i<temp.size();i++){
+    //         cout<<temp[i]<<" ";
+    //     }
+
+    // }
+
+
+    void preGretest(vector<int> &height){
+        for(int i=0;i<height.size();i++){
+            int max=height[i];
+            if(max<height[i]){
+                max=height[i];
             }
-            k++;
         }
-        while(i<m){
-            temp[k]=v1[i];
-            i++;
-            k++;
-        }
-        while(j<n){
-            temp[k]=v2[j];
-            j++;
-            k++;
-        }
-
         
     }
+
+
     int main(){
-        vector<int> v1={1,4,5,8}, v2={2,3,6,7,10,12};
-        int m=v1.size();
-        int n=v2.size();
-        vector<int> temp(n+m);
-
-        merge(v1, v2, temp);
-
-        cout<<"Shorted Array: ";
-        for(int i=0;i<temp.size();i++){
-            cout<<temp[i]<<" ";
-        }
-
-
-
-
+        vector<int> height= {0,1,0,2,1,0,1,3,2,1,2,1};
+        preGretest(height);
+        
     }
 
 
