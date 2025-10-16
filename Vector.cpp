@@ -468,26 +468,89 @@ using namespace std;
     // }
 
 
-    void preGretest(vector<int> &height){
-        for(int i=0;i<height.size();i++){
-            int max=height[i];
-            if(max<height[i]){
-                max=height[i];
-            }
+    // void preGretest(vector<int> &height){
+    //     for(int i=0;i<height.size();i++){
+    //         int max=height[i];
+    //         if(max<height[i]){
+    //             max=height[i];
+    //         }
+    //     }
+        
+    // }
+
+
+    // int main(){
+    //     vector<int> height= {0,1,0,2,1,0,1,3,2,1,2,1};
+    //     preGretest(height);
+        
+    // }
+
+
+    //_______________________________________________________________   2D Arrays   _______________________________________________________________
+
+
+
+int main(){
+
+    //First way of declaring 
+    // int Arr[3][3]={{1,2,3},{4,5,6},{7,8,9}};
+    // cout<<Arr[0][0] <<" ";
+    // cout<<Arr[0][1] <<" ";
+    // cout<<Arr[0][2]<<endl;
+    // cout<<Arr[1][0] <<" ";
+    // cout<<Arr[1][1] <<" ";
+    // cout<<Arr[1][2]<<endl;
+    // cout<<Arr[2][0] <<" ";
+    // cout<<Arr[2][1] <<" ";
+    // cout<<Arr[2][2]<<endl;
+
+
+    // //second way of declaring 
+    // int Arr[3][3]={1,2,3,4,5,6,7,8,9}; //this ia also correct way
+    // cout<<Arr[0][0] <<" ";
+    // cout<<Arr[0][1] <<" ";
+    // cout<<Arr[0][2]<<endl;
+    // cout<<Arr[1][0] <<" ";
+    // cout<<Arr[1][1] <<" ";
+    // cout<<Arr[1][2]<<endl;
+    // cout<<Arr[2][0] <<" ";
+    // cout<<Arr[2][1] <<" ";
+    // cout<<Arr[2][2]<<endl;
+
+
+    //Printing with the help of loop
+    // int Arr[3][3]={1,2,3,4,5,6,7,8,9};
+    // for(int i=0;i<3;i++){
+    //     for(int j=0;j<3;j++){
+    //         cout<<Arr[i][j]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+
+
+    int m;
+    cout<<"Enter the no of rows: ";
+    cin>>m;
+    int n;
+    cout<<"Enter the no of colums: ";
+    cin>>n;
+
+    int Arr[m][n];
+    cout<<"Enter the elements: "<<endl;
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>Arr[i][j];
         }
-        
     }
+    cout<<"_____  Your Array  _____"<<endl;
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cout<<Arr[i][j]<<" ";
 
-
-    int main(){
-        vector<int> height= {0,1,0,2,1,0,1,3,2,1,2,1};
-        preGretest(height);
-        
+        }
+        cout<<endl;
     }
-
-
-
-
+}
 
 
 
