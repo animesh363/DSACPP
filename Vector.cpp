@@ -491,7 +491,7 @@ using namespace std;
 
 
 
-int main(){
+// int main(){
 
     //First way of declaring 
     // int Arr[3][3]={{1,2,3},{4,5,6},{7,8,9}};
@@ -569,49 +569,91 @@ int main(){
     //     cout<<endl;
     // }
 
-    int m;
-    cout<<"Enter no of rows: ";
+//     int m;
+//     cout<<"Enter no of rows: ";
+//     cin>>m;
+//     int n;
+//     cout<<"Enter no of colums: ";
+//     cin>>n;
+
+//     int Arr[m][n];
+//     cout<<"Enter all the elements of 2D Array: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     cout<<"Your 2D Array"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
+//     int sum = 0 ;
+
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             if(Arr[i][j]>sum){
+//                 sum += Arr[i][j];
+//             }
+//         }
+//     }
+
+//     cout<<"Sum of all Elements = "<<sum;
+
+ 
+// }
+
+
+//Q)    Write a program to add two matrices.
+
+
+
+
+int main(){
+    int m, n;
+    cout<<"Enter no of rows :";
     cin>>m;
-    int n;
-    cout<<"Enter no of colums: ";
+    cout<<"Enter no of colums :";
     cin>>n;
 
-    int Arr[m][n];
+    int mat1[m][n];
+    int mat2[m][n];
+    int res[m][n];
+
+
+    cout<<"Enter elements of Mat1 : "<<endl;
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>mat1[i][j];
+        }
+    }
+    cout<<"Now enter elements of Mat2 : "<<endl;
 
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            cin>>Arr[i][j];
+            cin>>mat2[i][j];
         }
     }
-    cout<<"Your 2D Array"<<endl;
+
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            cout<<Arr[i][j]<<" ";
+            res[i][j] = mat1[i][j] + mat2[i][j];
+        }
+    }
+    cout<<"Resultant Matrices is : "<<endl;
+
+     for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cout<<res[i][j] <<" ";
         }
         cout<<endl;
     }
-    int max = INT_MIN;
-
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            if(Arr[i][j]>max){
-                max = Arr[i][j];
-            }
-        }
-    }
-
-    cout<<"Grreatest element = "<<max;
-
-    
-
-
-
 
 
 
 }
-
-
 
 
 
