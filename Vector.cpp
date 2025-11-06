@@ -234,12 +234,12 @@ using namespace std;
 //         j--;
 //     }
 
-//     //using swap
-//     // while(i<=j){
-//     //     swap(v[i],v[j]);
-//     //     i++;
-//     //     j--;
-//     // }
+//     // using swap
+//     while(i<=j){
+//         swap(v[i],v[j]);
+//         i++;
+//         j--;
+//     }
 
 //     //Using for loop***
 //     // for(int i=0,j=v.size()-1;i<=j;i++,j--){
@@ -335,57 +335,58 @@ using namespace std;
 //________________________________________________________________     Questions      ________________________________________________________________
 
 
-//Q)Sort the array of O's and I's ?
+// //Q)Sort the array of O's and I's ?
     
-    // int main(){
-    //     vector<int>v;
-    //     v.push_back(0);
-    //     v.push_back(1);
-    //     v.push_back(1);
-    //     v.push_back(0);
-    //     v.push_back(1);
-    //     v.push_back(0);
-    //     v.push_back(0);
-    //     v.push_back(1);
+//     int main(){
+//         vector<int>v;
+//         v.push_back(0);
+//         v.push_back(1);
+//         v.push_back(1);
+//         v.push_back(0);
+//         v.push_back(1);
+//         v.push_back(0);
+//         v.push_back(0);
+//         v.push_back(1);
 
-        //M1
+//         // M1
 
-        // int noz =0;
-        // int noo=0;
-        // for(int i=0;i<v.size();i++){
-        //     if(v[i] == 0) noz++;
-        //     else noo++;  
-        // }
-        // for(int i=0;i<v.size();i++){
-        //     if(i<noz) v[i] = 0;
-        //     else v[i] = 1;  
-        // }
+//         // int noz =0;
+//         // int noo=0;
+//         // for(int i=0;i<v.size();i++){
+//         //     if(v[i] == 0) noz++;
+//         //     else noo++;  
+//         // }
+//         // for(int i=0;i<v.size();i++){
+//         //     if(i<noz) v[i] = 0;
+//         //     else v[i] = 1;  
+//         // }
+//         // cout<<"Shorted Element: ";
+//         // for(int i=0;i<v.size();i++){
+//         //     cout<<v[i]<<" ";
+//         // }
 
-        // cout<<"Shorted Element: ";
-        // for(int i=0;i<v.size();i++){
-        //     cout<<v[i]<<" ";
-        // }
+//         //M2
 
-        //M2
+//         int i=0;
+//         int j=v.size()-1;
+//         while(i<j){
+//             if(v[i] == 0) i++;
+//             if(v[j]== 1) j--;
+//             if(i>j) break;// will break loop in the last itration
+//             if(v[i]==1 && v[j]==0){
+//                 v[i]=0;
+//                 v[j]=1;
+//                 i++;
+//                 j--;  
+//             }  
+//         }
+//         cout<<"Shorted Element: ";
+//         for(int i=0;i<v.size();i++){
+//             cout<<v[i]<<" ";
+//         }
+//     }
 
-    //     int i=0;
-    //     int j=v.size()-1;
-    //     while(i<j){
-    //         if(v[i] == 0) i++;
-    //         if(v[j]== 1) j--;
-    //         if(i>j) break;// will break loop in the last itration
-    //         if(v[i]==1 && v[j]==0){
-    //             v[i]=0;
-    //             v[j]=1;
-    //             i++;
-    //             j--;  
-    //         }  
-    //     }
-    //     cout<<"Shorted Element: ";
-    //     for(int i=0;i<v.size();i++){
-    //         cout<<v[i]<<" ";
-    //     }
-    // }
+    //__________________________________________________________________________________________
 
 
     // void swap01(vector<int>&a){
@@ -497,7 +498,7 @@ int main(){
     // cout<<Arr[0][0] <<" ";
     // cout<<Arr[0][1] <<" ";
     // cout<<Arr[0][2]<<endl;
-    // cout<<Arr[1][0] <<" ";
+    // cout<<Arr[1][0] <<" "; 
     // cout<<Arr[1][1] <<" ";
     // cout<<Arr[1][2]<<endl;
     // cout<<Arr[2][0] <<" ";
@@ -528,28 +529,86 @@ int main(){
     // }
 
 
+    // int m;
+    // cout<<"Enter the no of rows: ";
+    // cin>>m;
+    // int n;
+    // cout<<"Enter the no of colums: ";
+    // cin>>n;
+
+    // int Arr[m][n];
+    // cout<<"Enter the elements: "<<endl;
+    // for(int i=0;i<m;i++){
+    //     for(int j=0;j<n;j++){
+    //         cin>>Arr[i][j];
+    //     }
+    // }
+    // cout<<"_____  Your Array  _____"<<endl;
+    // for(int i=0;i<m;i++){
+    //     for(int j=0;j<n;j++){
+    //         cout<<Arr[i][j]<<" ";
+
+    //     }
+    //     cout<<endl;
+    // }
+
+//Q)Write a program to store roll number and marks obtained by 4 students side by side in a matrix.
+
+
+    // int list[4][2];
+
+    // cout<<"Enter  marks: ";
+    // for(int i=1;i<=4;i++){
+    //         cin>>list[i][j];
+    // }
+    // cout<<"Marks are: "<<endl;
+    // for(int i=1;i<=4;i++){
+    //     for(int j=1;j<=2;j++){
+    //         cout<<list[i][j] <<" ";
+    //     }
+    //     cout<<endl;
+    // }
+
     int m;
-    cout<<"Enter the no of rows: ";
+    cout<<"Enter no of rows: ";
     cin>>m;
     int n;
-    cout<<"Enter the no of colums: ";
+    cout<<"Enter no of colums: ";
     cin>>n;
 
     int Arr[m][n];
-    cout<<"Enter the elements: "<<endl;
+
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
             cin>>Arr[i][j];
         }
     }
-    cout<<"_____  Your Array  _____"<<endl;
+    cout<<"Your 2D Array"<<endl;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
             cout<<Arr[i][j]<<" ";
-
         }
         cout<<endl;
     }
+    int max = INT_MIN;
+
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            if(Arr[i][j]>max){
+                max = Arr[i][j];
+            }
+        }
+    }
+
+    cout<<"Grreatest element = "<<max;
+
+    
+
+
+
+
+
+
 }
 
 
