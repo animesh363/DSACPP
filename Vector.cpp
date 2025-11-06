@@ -611,49 +611,98 @@ using namespace std;
 
 
 
+// int main(){
+//     int m, n;
+//     cout<<"Enter no of rows :";
+//     cin>>m;
+//     cout<<"Enter no of colums :";
+//     cin>>n;
+
+//     int mat1[m][n];
+//     int mat2[m][n];
+//     int res[m][n];
+
+
+//     cout<<"Enter elements of Mat1 : "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>mat1[i][j];
+//         }
+//     }
+//     cout<<"Now enter elements of Mat2 : "<<endl;
+
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>mat2[i][j];
+//         }
+//     }
+
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             res[i][j] = mat1[i][j] + mat2[i][j];
+//         }
+//     }
+//     cout<<"Resultant Matrices is : "<<endl;
+
+//      for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cout<<res[i][j] <<" ";
+//         }
+//         cout<<endl;
+//     }
+
+    
+
+// }
+
+//  Q) Storing and printing Tanspose of a matrics 
+
 int main(){
-    int m, n;
-    cout<<"Enter no of rows :";
+
+
+    
+    int m;
+    cout<<"Enter no of rows: ";
     cin>>m;
-    cout<<"Enter no of colums :";
+    int n;
+    cout<<"Enter no of colums: ";
     cin>>n;
 
-    int mat1[m][n];
-    int mat2[m][n];
-    int res[m][n];
-
-
-    cout<<"Enter elements of Mat1 : "<<endl;
+    int Arr[m][n];
+    cout<<"Enter all the elements of 2D Array: "<<endl;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            cin>>mat1[i][j];
+            cin>>Arr[i][j];
         }
     }
-    cout<<"Now enter elements of Mat2 : "<<endl;
-
+    cout<<"Your 2D Array"<<endl;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            cin>>mat2[i][j];
+            cout<<Arr[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    //storing Transpose
+    int Trans[n][m];
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            Trans[i][j]=Arr[j][i];
         }
     }
-
+    cout<<"Your Transpose Matrics: "<<endl;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            res[i][j] = mat1[i][j] + mat2[i][j];
-        }
-    }
-    cout<<"Resultant Matrices is : "<<endl;
-
-     for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cout<<res[i][j] <<" ";
+            cout<<Trans[i][j]<<" ";
         }
         cout<<endl;
     }
 
 
-
 }
+
+
+
+
 
 
 
