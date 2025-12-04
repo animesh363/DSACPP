@@ -24,14 +24,38 @@ int main(){
         cout<<endl;
     }
 
-    cout<<"Transpose of your matrics is: "<<endl;
+    cout<<endl;
 
-    for(int j=0;j<n;j++){
-        for(int i=0;i<m;i++){
-            cout<<Arr[i][j]<<" ";
+    //Printing Directly Transpose
+
+    // cout<<"Transpose of your matrics is: "<<endl;
+    // for(int j=0;j<n;j++){
+    //     for(int i=0;i<m;i++){
+    //         cout<<Arr[i][j]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+
+    //Stroring and printing Transpose
+
+    int Tr[n][m];
+
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            Tr[i][j]=Arr[j][i];
+
+        }
+    }
+
+    cout<<"Traspose of your matrics " <<endl;
+    
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            cout<<Tr[i][j]<<" ";
         }
         cout<<endl;
     }
+
 
 
 }
