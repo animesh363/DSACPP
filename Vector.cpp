@@ -12,11 +12,11 @@ using namespace std;
     // v[4] = 9; //updating the value
      
 
-    // cout<<v[0]<<" ";
-    // cout<<v[1]<<" ";
-    // cout<<v[2]<<" ";
-    // cout<<v[3]<<" ";
-    // cout<<v[4]<<" ";
+    // // cout<<v[0]<<" ";
+    // // cout<<v[1]<<" ";
+    // // cout<<v[2]<<" ";
+    // // cout<<v[3]<<" ";
+    // // cout<<v[4]<<" ";
 
     
     // for(int i=0;i<v.size();i++){ //we can print value with loop as well
@@ -24,9 +24,13 @@ using namespace std;
     // }
 
     // cout<<"\nCurrent size = " << v.size();
-    // cout<<"\nCurrent capacity = " << v.capacity();
+    // cout<<"\nCurrent capacity = " << v.capacity()<<endl;
 
     // v.pop_back(); // removing last element
+
+    // for(int i=0;i<v.size();i++){ 
+    //     cout<<v[i] << " ";
+    // }
     
 
     // Size = how many elements are in the vector right now.
@@ -52,7 +56,7 @@ using namespace std;
     //     cout<<v[i]<<" ";
     // }
 
-    //Without giving size
+    // Without giving size
     // vector<int> v;
     // for(int i=0;i<5;i++){
     //     int x;
@@ -67,24 +71,24 @@ using namespace std;
 
     //At property
 
-    // vector <int> v;
-    // v.push_back(4);
-    // v.push_back(9);
-    // v.push_back(1);
-    // v.push_back(7);
+//     vector <int> v;
+//     v.push_back(4);
+//     v.push_back(9);
+//     v.push_back(1);
+//     v.push_back(7);
 
 
-    // for (int i=0;i<v.size();i++){
-    //     cout<<v.at(i)<<" ";
-    // }
-    // cout<<endl;
+//     for (int i=0;i<v.size();i++){
+//         cout<<v.at(i)<<" ";
+//     }
+//     cout<<endl;
 
-    // sort(v.begin(), v.end());
-    // cout<<"Shorted Array: ";
-    // for (int i=0;i<v.size();i++){
-    //     cout<<v.at(i)<<" ";
-    // }
-    // cout<<endl;
+//     sort(v.begin(), v.end());
+//     cout<<"Shorted Array: ";
+//     for (int i=0;i<v.size();i++){
+//         cout<<v.at(i)<<" ";
+//     }
+//     cout<<endl;
 
      
 // }
@@ -657,48 +661,48 @@ using namespace std;
 
 //  Q) Storing and printing Tanspose of a matrics 
 
-int main(){
+// int main(){
 
 
     
-    int m;
-    cout<<"Enter no of rows: ";
-    cin>>m;
-    int n;
-    cout<<"Enter no of colums: ";
-    cin>>n;
+//     int m;
+//     cout<<"Enter no of rows: ";
+//     cin>>m;
+//     int n;
+//     cout<<"Enter no of colums: ";
+//     cin>>n;
 
-    int Arr[m][n];
-    cout<<"Enter all the elements of 2D Array: "<<endl;
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cin>>Arr[i][j];
-        }
-    }
-    cout<<"Your 2D Array"<<endl;
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cout<<Arr[i][j]<<" ";
-        }
-        cout<<endl;
-    }
-    //storing Transpose
-    int Trans[n][m];
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++){
-            Trans[i][j]=Arr[j][i];
-        }
-    }
-    cout<<"Your Transpose Matrics: "<<endl;
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cout<<Trans[i][j]<<" ";
-        }
-        cout<<endl;
-    }
+//     int Arr[m][n];
+//     cout<<"Enter all the elements of 2D Array: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     cout<<"Your 2D Array"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
+//     //storing Transpose
+//     int Trans[n][m];
+//     for(int i=0;i<n;i++){
+//         for(int j=0;j<m;j++){
+//             Trans[i][j]=Arr[j][i];
+//         }
+//     }
+//     cout<<"Your Transpose Matrics: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cout<<Trans[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
 
 
-}
+// }
 
 
 
