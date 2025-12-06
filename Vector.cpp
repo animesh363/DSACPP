@@ -701,14 +701,241 @@ using namespace std;
 //         cout<<endl;
 //     }
 
+// }
+
+//Q) Transforming in same matrices(square) #Important for leetcode
+
+// int main(){
+//     int m;
+//     cout<<"No of Rows/colms: ";
+//     cin>>m;
+//     int Arr[m][m];
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     cout<<"Your matrix :"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
+//     //Swap and Transpose in Same matrics
+//     for(int i=0;i<m;i++){
+//         for(int j=i+1;j<m;j++){
+//              int temp=Arr[i][j];
+//              Arr[i][j]=Arr[j][i];
+//              Arr[j][i]=temp;
+//         }
+//     }
+    
+//     //Print
+//     cout <<"Swaped Matrics" <<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     } 
+// }
+
+//Q)Rotating a matrix by 90 degree clockwisw
+
+// int main(){
+//     int m;
+//     cout<<"No of Rows/colms: ";
+//     cin>>m;
+//     int Arr[m][m];
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     cout<<"Your matrix :"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
+//     //Transpose in Same matrics
+
+//     for(int i=0;i<m;i++){
+//         for(int j=i+1;j<m;j++){
+//             int temp=Arr[i][j];
+//             Arr[i][j]=Arr[j][i];
+//             Arr[j][i]=temp;
+//         }
+//     }
+//     //Printing Transpose
+//     cout<<"Transpose matrix"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
+//     //Flip
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m/2;j++){
+//             swap(Arr[i][j],Arr[i][m-1-j]);
+//         }
+//     }
+//     //Print
+//     cout<<"Rotated matrix"<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<m;j++){
+//             cout<<Arr[i][j]<<" ";
+//         }
+//         cout<<endl;
+//     }
 
 // }
 
 
+//___________   *Multiplication of 2 Matrices*    ___________
 
+// int main(){
+//     int m;
+//     cout<<"Enter no rows of 1st matrices: ";
+//     cin>>m;
+//     int n;
+//     cout<<"Enter no colums of 1st matrices: ";
+//     cin>>n;
 
+//     int p;
+//     cout<<"Enter no rows of 2nd matrices: ";
+//     cin>>p;
+//     int q;
+//     cout<<"Enter no rows of 2nd matrices: ";
+//     cin>>q;
+//     if(n==p){
+//         //Inputs
+//         int Arr1[m][n];
+//         cout<<"Enter Elements of 1st Matrices:"<<endl;
+//         for(int i=0;i<m;i++){
+//             for(int j=0;j<n;j++){
+//                 cin>>Arr1[i][j];
+//             }
+//         }
+//         int Arr2[p][q];
+//         cout<<"Enter Elements of 2nd Matrices:"<<endl;
+//         for(int i=0;i<p;i++){
+//             for(int j=0;j<q;j++){
+//                 cin>>Arr2[i][j];
+//             }
+//         }
+//         //Resultant
+//         int Res[m][q];
+//         for(int i=0;i<m;i++){
+//             for(int j=0;j<q;j++){
+//                 Res[i][j]=0;
+//                 for(int k=0;k<p;k++){
+//                     Res[i][j] +=Arr1[i][k]*Arr2[k][j];
+//                 }
+//             }
+//         }
+//         cout<<"Resultant matrices: "<<endl;
+        
+//         for(int i=0;i<m;i++){
+//             for(int j=0;j<q;j++){
+//                 cout<<Res[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//     }
+//     else{
+//         cout<<"Your matrices cant be multiplied";
+//     }
 
+    
+// }
 
+//Q1.A)Printing a Matrics in wave form
+
+/*Enter Element of matrices:
+1 2 3
+4 5 6
+7 8 9
+Your matrics in wave form
+1 2 3
+6 5 4
+7 8 9*/
+
+// int main(){
+//     int m,n;
+//     cout<<"Entr no of Rows: ";
+//     cin>>m;
+//     cout<<"Entr no of colums: ";
+//     cin>>n;
+
+//     int Arr[m][n];
+//     cout<<"Enter Element of matrices: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     //Printing in wave form
+//     cout<<"Your matrics in wave form"<<endl;
+//     for(int i=0;i<m;i++){
+//         if(i%2==0){
+//             for(int j=0;j<n;j++){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//         else{
+//             for(int j=n-1;j>=0;j--){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//     }
+// }
+
+//Q1.B )other way
+/*Enter Element of matrices:
+1 2 3
+4 5 6
+7 8 9
+Your matrics in wave form
+3 2 1
+4 5 6
+9 8 7*/
+int main(){
+    int m,n;
+    cout<<"Entr no of Rows: ";
+    cin>>m;
+    cout<<"Entr no of colums: ";
+    cin>>n;
+
+    int Arr[m][n];
+    cout<<"Enter Element of matrices: "<<endl;
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>Arr[i][j];
+        }
+    }
+    //Printing in wave form
+    cout<<"Your matrics in wave form"<<endl;
+    for(int i=0;i<m;i++){
+        if(i%2==0){
+            for(int j=n-1;j>=0;j--){
+                cout<<Arr[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+        else{
+            for(int j=0;j<n;j++){
+                cout<<Arr[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+    }
+}
 
 
 
