@@ -556,7 +556,7 @@ using namespace std;
     //     cout<<endl;
     // }
 
-//Q)Write a program to store roll number and marks obtained by 4 students side by side in a matrix.
+//?Q)Write a program to store roll number and marks obtained by 4 students side by side in a matrix.
 
 
     // int list[4][2];
@@ -610,7 +610,7 @@ using namespace std;
 // }
 
 
-//Q)    Write a program to add two matrices.
+//?Q)    Write a program to add two matrices.
 
 
 
@@ -659,7 +659,7 @@ using namespace std;
 
 // }
 
-//  Q) Storing and printing Tanspose of a matrics 
+//?  Q) Storing and printing Tanspose of a matrics 
 
 // int main(){
 
@@ -853,7 +853,7 @@ using namespace std;
     
 // }
 
-//Q1.A)Printing a Matrics in wave form
+//?Q1.A)Printing a Matrics in wave form
 
 /*Enter Element of matrices:
 1 2 3
@@ -878,7 +878,7 @@ Your matrics in wave form
 //             cin>>Arr[i][j];
 //         }
 //     }
-//     //Printing in wave form
+//     //?Printing in wave form
 //     cout<<"Your matrics in wave form"<<endl;
 //     for(int i=0;i<m;i++){
 //         if(i%2==0){
@@ -947,39 +947,95 @@ Your matrics in wave form
 7 8 9 
 6 5 4 
 1 2 3 */
+// int main(){
+//     int m,n;
+//     cout<<"Entr no of Rows: ";
+//     cin>>m;
+//     cout<<"Entr no of colums: ";
+//     cin>>n;
+
+//     int Arr[m][n];
+//     cout<<"Enter Element of matrices: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     //Printing in wave form
+//     cout<<"Your matrics in wave form"<<endl;
+//     for(int i=m-1;i>=0;i--){
+//         if(i%2==0){
+//             //forward loop
+//             for(int j=0;j<n;j++){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//         else{
+//             //backward loop
+//             for(int j=n-1;j>=0;j--){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//     }
+// }
+
+//?Printing Matrix in Spiral form(LeetCode-54 Spiral Matrix)
+// 1 2 3
+// 4 5 6
+// 7 8 9
+// Output) 1 2 3 6 9 8 7 4 5 
+
 int main(){
-    int m,n;
-    cout<<"Entr no of Rows: ";
+    int m;
+    cout<<"Enter the value of m: ";
     cin>>m;
-    cout<<"Entr no of colums: ";
+    int n;
+    cout<<"Enter the value of n: ";
     cin>>n;
 
     int Arr[m][n];
-    cout<<"Enter Element of matrices: "<<endl;
+    cout<<"Entrer Element of the matrics: "<<endl;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
             cin>>Arr[i][j];
         }
     }
-    //Printing in wave form
-    cout<<"Your matrics in wave form"<<endl;
-    for(int i=m-1;i>=0;i--){
-        if(i%2==0){
-            //forward loop
-            for(int j=0;j<n;j++){
-                cout<<Arr[i][j]<<" ";
-            }
-            cout<<endl;
+    int minr=0, minc=0;
+    int maxr=m-1,maxc=n-1;
+    while(minr<=maxr && minc<=maxc){
+        //Right
+        for(int j=minc;j<=maxc;j++){
+            cout<<Arr[minr][j]<<" ";
         }
-        else{
-            //backward loop
-            for(int j=n-1;j>=0;j--){
-                cout<<Arr[i][j]<<" ";
-            }
-            cout<<endl;
+        minr++;
+        if(minr>maxr || minc>maxc) break;// other wise can give error
+        //Dowm
+        for(int i=minr;i<=maxr;i++){
+            cout<<Arr[i][maxc]<<" ";
         }
+        maxc--;
+        if(minr>maxr || minc>maxc) break;
+        //Left
+        for(int j=maxc;j>=minc;j--){
+            cout<<Arr[maxr][j]<<" ";
+        }
+        maxr--;
+        if(minr>maxr || minc>maxc) break;
+        //Up:
+        for(int i=maxr;i>=minr;i--){
+            cout<<Arr[i][minc]<<" ";
+        }
+        minc++;
+        if(minr>maxr || minc>maxc) break;
+
     }
-    
+
+
+
+
+
 }
 
 
