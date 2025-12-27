@@ -33,13 +33,34 @@ int main(){
     // cin>>name;
     // cout<< "Your name is "<< name;
 
-    //Problem
+    //// Problem
     // string str;
     // cin>>str;//Animesh Anand -> Animesh after space it is not taking it as a input
     // cout<<str;
 
-    //solution 
-    string str2;
-    getline(cin,str2);
-    cout<<str2;
+    // //solution 
+    // string str2;
+    // getline(cin,str2);
+    // cout<<str2;
+
+    // //Q1)Inout a string of length n and count all vovels in the given string.
+    // string str3;
+    // cout<<"Enter your string: ";
+    // cin>>str3;
+    // int count=0;
+    // for(int i=0;i<str3.length();i++){
+    //     if(str3[i]=='a' || str3[i]=='A' ||  str3[i]=='e' || str3[i]=='E' ||str3[i]=='i' ||str3[i]=='I' ||str3[i]=='o' ||str3[i]=='O' ||str3[i]=='u' ||str3[i]=='U'){
+    //         count++;
+    //     }
+    // }
+    // cout<<"Total number of vovels: "<<count;
+
+    //We can change single character of a string => Strins are mutable in cpp
+
+    string str4="Animesh";
+    str4[1]='m';
+    cout<<str4;
 }
+
+
+
