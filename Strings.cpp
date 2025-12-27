@@ -55,11 +55,24 @@ int main(){
     // }
     // cout<<"Total number of vovels: "<<count;
 
-    //We can change single character of a string => Strins are mutable in cpp
+    // //We can change single character of a string => Strins are mutable in cpp
 
-    string str4="Animesh";
-    str4[1]='m';
-    cout<<str4;
+    // string str4="Animesh";
+    // str4[1]='m'; //n->m
+    // cout<<str4;//Amimesh
+
+    //Q2)Ques : Input a string of size n and Update all the even positions in the string to character 'a'. Consider O-based indexing.
+
+    string s4;
+    cout<<"Enter your String: ";
+    cin>>s4;
+
+    for(int i=0;i<s4.length();i++){
+        if(i%2!=0){
+            s4[i]='a';
+        }
+    }
+    cout<<s4;
 }
 
 
