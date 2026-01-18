@@ -155,10 +155,17 @@ int main(){
 
 
     //to_string()
-    int x=12345;
-    cout<<to_string(x);
+    // int x=12345;
+    // cout<<to_string(x);
 
-Q
+//Q6)Ques : Return the total number of digits in a number without using any loop.
+
+    int num;
+    cout<<"Enter a number : ";
+    cin>>num;
+
+    string sn=to_string(num);
+    cout<<"Total number of digits in your number is " << sn.size();
 
   
 
