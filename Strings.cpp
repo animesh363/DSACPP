@@ -9,7 +9,7 @@ int main(){
     // //     cout<<str[i] <<" ";
     // // }
 
-    // char ch= '\0';//0
+    // char ch= '\0';   //0
     // cout<<int(ch);
 
     // char str1[]={'a','b','c','d','\0'}; //-->\0 used for terminating the it is added by default
@@ -61,18 +61,95 @@ int main(){
     // str4[1]='m'; //n->m
     // cout<<str4;//Amimesh
 
-    //Q2)Ques : Input a string of size n and Update all the even positions in the string to character 'a'. Consider O-based indexing.
+//Q2)Ques : Input a string of size n and Update all the even positions in the string to character 'a'. Consider O-based indexing.
 
-    string s4;
-    cout<<"Enter your String: ";
-    cin>>s4;
+    // string s4;
+    // cout<<"Enter your String: ";
+    // cin>>s4;
 
-    for(int i=0;i<s4.length();i++){
-        if(i%2!=0){
-            s4[i]='a';
-        }
-    }
-    cout<<s4;
+    // for(int i=0;i<s4.length();i++){
+    //     if(i%2!=0){
+    //         s4[i]='a';
+    //     }
+    // }
+    // cout<<s4;
+
+    //Size of a string
+    // string str="Animesh Thakur";
+    // cout<<"Lenth of the string is:"<<str.size()<<endl; //we can use both actual lenth excluding null character
+    // cout<<"Lenth of the string is:"<<str.length();
+
+    // +Oprator
+    // string s1="abc";
+    //string s2="def"
+    // string r=s1+s2;
+    // cout<<r;//abcdef
+
+    // string s1="abc";
+    // string r=s1+"def"; //add s1+"def" or "def"+s1
+    // cout<<r;//abcdef
+
+    // string s1="abc";
+    // string r=s1+'d';
+    // cout<<r;//abcd
+
+    // string s1="Anime";
+    // s1.push_back('s');
+    // s1.push_back('h');
+    // cout<<s1<<endl;
+    // s1.pop_back();
+    // cout<<s1;
+
+    //reverse()
+
+    // string s="abcde";
+    // reverse(s.begin(),s.end());
+    // cout<<s;//edcba
+
+    // string s="abcde";
+    // reverse(s.begin(),s.begin()+2);
+    // cout<<s;//bacde
+
+//Q3)Ques : Input a string of even length and reverse the first half of the string.
+    // string s;
+    // cout<<"Enter a string of even lenth: ";
+    // cin>>s;
+    // if(s.size()%2!=0){
+    //     cout<<"Type string of even length only";
+    // }else{
+    //     reverse(s.begin(),s.begin()+(s.size()/2));
+    //     cout<<s;
+    // }
+
+//Q4)Ques : Input a string of length greater than 5 and reverse the substring from position 2 to 5 using inbuilt functions.
+
+    // string s;
+    // cout<<"Enter a string whose length should be greater than 5 :";
+    // cin>>s;
+    // if(s.size()<=5){
+    //     cout<<"Your string not having length greater than five: "<<endl;
+    // }else{
+    //     reverse(s.begin()+1,s.begin()+5);
+    //     cout<<"Expected output: " + s;
+    // }
+
+    //Substr()
+    // string s1="animesh";
+    // cout<<s1.substr(2);//imesh  (strting index)
+
+    // string s2="animesh";
+    // cout<<s2.substr(1,4);//nime   (strting index and length )
+
+//Q5)
+
+  
+
+    
+
+
+    
+
+
 }
 
 
