@@ -140,7 +140,25 @@ int main(){
     // string s2="animesh";
     // cout<<s2.substr(1,4);//nime   (strting index and length )
 
-//Q5)
+//Q5)Ques : Input a string of even length and return the second half of that string using inbuilt substr function
+
+    // string s;
+    // cout<<"Enter a string of even number: ";
+    // cin>>s;
+
+    // if(s.size()%2!=0){
+    //     cout<<"Enter strig string of even length only";
+    // }else{
+    //     string sf =s.substr(s.size()/2);
+    //     cout<<"Your second half string : " + sf;
+    // }
+
+
+    //to_string()
+    int x=12345;
+    cout<<to_string(x);
+
+Q
 
   
 
