@@ -160,19 +160,63 @@ int main(){
 
 //Q6)Ques : Return the total number of digits in a number without using any loop.
 
-    int num;
-    cout<<"Enter a number : ";
-    cin>>num;
+    // int num;
+    // cout<<"Enter a number : ";
+    // cin>>num;
 
-    string sn=to_string(num);
-    cout<<"Total number of digits in your number is " << sn.size();
-
+    // string sn=to_string(num);
+    // cout<<"Total number of digits in your number is " << sn.size();
   
 
-    
+//Q7)Warmup Problem : Input a string and return the number of times the neighbouring characters are different from each other.
 
+    // string s;
+    // cout<<"Enter your string: ";
+    // cin>>s;
 
-    
+    // int cnt=0;
+    // int n=s.size();
+    // for(int i=0;i<n;i++){
+    //     if(n==1){
+    //         break;
+    //     }
+    //     if(n==2 && s[0]!=s[1]){
+    //         cnt =1;
+    //         break;
+    //     }
+    //     if(i==0){
+    //         if(s[i]!=s[i+1]) cnt++;
+    //     }
+    //     else if(i==n-1){
+    //         if(s[i]!=s[i-1]) cnt++;
+    //     }
+    //     else if(s[i]!=s[i-1] && s[i]!=s[i+1]){
+    //         cnt++;
+    //     }
+
+    // }
+    // cout<<"Expected Output : " <<cnt;
+
+    //Sorting a string using in-built function
+
+    // string s;
+    // cout<<"Enter string: ";
+    // getline(cin,s);
+    // sort(s.begin(),s.end());
+    // cout<<s;
+
+    string s1="silent";
+    string s2="listen";
+
+    sort(s1.begin(),s1.end());
+    sort(s2.begin(),s2.end());
+
+    if(s1==s2){
+        cout<<"yes s1 and s2 is Anagram";
+    }else{
+        cout<<"s1 and s2 is not Anagram";
+    }
+
 
 
 }
