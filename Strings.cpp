@@ -205,17 +205,23 @@ int main(){
     // sort(s.begin(),s.end());
     // cout<<s;
 
-    string s1="silent";
-    string s2="listen";
 
-    sort(s1.begin(),s1.end());
-    sort(s2.begin(),s2.end());
 
-    if(s1==s2){
-        cout<<"yes s1 and s2 is Anagram";
-    }else{
-        cout<<"s1 and s2 is not Anagram";
-    }
+    // string s1="silent";
+    // string s2="listen";
+
+    // sort(s1.begin(),s1.end());
+    // sort(s2.begin(),s2.end());
+
+    // if(s1==s2){
+    //     cout<<"yes s1 and s2 is Anagram";
+    // }else{
+    //     cout<<"s1 and s2 is not Anagram";
+    // }
+
+//Q8)Ques : Given a string consisting of lowercase English alphabets. Print the character that is occurring most number of times.
+
+    
 
 
 

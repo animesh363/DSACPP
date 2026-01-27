@@ -612,9 +612,6 @@ using namespace std;
 
 //?Q)    Write a program to add two matrices.
 
-
-
-
 // int main(){
 //     int m, n;
 //     cout<<"Enter no of rows :";
