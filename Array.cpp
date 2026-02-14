@@ -23,7 +23,7 @@ using namespace std;
     // }
 
    /*Ques: Given an array of marks of students, if the
-    markgof any student is less than 35 print its roll
+    markg of any student is less than 35 print its roll
     number. [roll number here refers to the index of the
     array.] */
 

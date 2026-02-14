@@ -9,7 +9,7 @@ int main(){
     // //     cout<<str[i] <<" ";
     // // }
 
-    // char ch= '\0';   //0
+    // char ch = '\0';   //0
     // cout<<int(ch);
 
     // char str1[]={'a','b','c','d','\0'}; //-->\0 used for terminating the it is added by default
@@ -74,15 +74,15 @@ int main(){
     // }
     // cout<<s4;
 
-    //Size of a string
+    // //Size of a string
     // string str="Animesh Thakur";
     // cout<<"Lenth of the string is:"<<str.size()<<endl; //we can use both actual lenth excluding null character
     // cout<<"Lenth of the string is:"<<str.length();
 
-    // +Oprator
-    // string s1="abc";
-    //string s2="def"
-    // string r=s1+s2;
+    // //+Oprator
+    // //string s1="abc";
+    // string s2="def"
+    // //string r=s1+s2;
     // cout<<r;//abcdef
 
     // string s1="abc";
@@ -100,7 +100,7 @@ int main(){
     // s1.pop_back();
     // cout<<s1;
 
-    //reverse()
+    // //reverse()
 
     // string s="abcde";
     // reverse(s.begin(),s.end());
@@ -154,7 +154,7 @@ int main(){
     // }
 
 
-    //to_string()
+    // //to_string()
     // int x=12345;
     // cout<<to_string(x);
 
@@ -193,7 +193,6 @@ int main(){
     //     else if(s[i]!=s[i-1] && s[i]!=s[i+1]){
     //         cnt++;
     //     }
-
     // }
     // cout<<"Expected Output : " <<cnt;
 
