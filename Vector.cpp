@@ -944,39 +944,39 @@ Your matrics in wave form
 7 8 9 
 6 5 4 
 1 2 3 */
-int main(){
-    int m,n;
-    cout<<"Entr no of Rows: ";
-    cin>>m;
-    cout<<"Entr no of colums: ";
-    cin>>n;
+// int main(){
+//     int m,n;
+//     cout<<"Entr no of Rows: ";
+//     cin>>m;
+//     cout<<"Entr no of colums: ";
+//     cin>>n;
 
-    int Arr[m][n];
-    cout<<"Enter Element of matrices: "<<endl;
-    for(int i=0;i<m;i++){
-        for(int j=0;j<n;j++){
-            cin>>Arr[i][j];
-        }
-    }
-    //Printing in wave form
-    cout<<"Your matrics in wave form"<<endl;
-    for(int i=m-1;i>=0;i--){
-        if(i%2==0){
-            //forward loop
-            for(int j=0;j<n;j++){
-                cout<<Arr[i][j]<<" ";
-            }
-            cout<<endl;
-        }
-        else{
-            //backward loop
-            for(int j=n-1;j>=0;j--){
-                cout<<Arr[i][j]<<" ";
-            }
-            cout<<endl;
-        }
-    }
-}
+//     int Arr[m][n];
+//     cout<<"Enter Element of matrices: "<<endl;
+//     for(int i=0;i<m;i++){
+//         for(int j=0;j<n;j++){
+//             cin>>Arr[i][j];
+//         }
+//     }
+//     //Printing in wave form
+//     cout<<"Your matrics in wave form"<<endl;
+//     for(int i=m-1;i>=0;i--){
+//         if(i%2==0){
+//             //forward loop
+//             for(int j=0;j<n;j++){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//         else{
+//             //backward loop
+//             for(int j=n-1;j>=0;j--){
+//                 cout<<Arr[i][j]<<" ";
+//             }
+//             cout<<endl;
+//         }
+//     }
+// }
 
 //?Printing Matrix in Spiral form(LeetCode-54 Spiral Matrix)
 // 1 2 3

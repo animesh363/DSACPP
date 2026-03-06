@@ -99,6 +99,7 @@ using namespace std;
 //     }
 //     return fact ;
 // }
+
 // int main(){
 //     int n, r;
 //     cout <<"Enter n and r: ";
@@ -192,29 +193,28 @@ using namespace std;
 
 
 //PASCLE TRIANGLE
+int fact(int x){
+    int f = 1;
+    for(int i=2;i<=x;i++){
+        f=f*i;
+    }
+    return f;
+}
+int combn(int n, int r){
+    int ncr = fact(n) / (fact(r) *fact(n-r));
+    return ncr;
+}
+int main(){
+    int n;
+    cout<<"Enter n: ";
+    cin>>n;
 
-// int fact(int x){
-//     int f = 1;
-//     for(int i=2;i<=x;i++){
-//         f=f*i;
-//     }
-//     return f;
-// }
-// int combn(int n, int r){
-//     int ncr = fact(n) / (fact(r) *fact(n-r));
-//     return ncr;
-// }
-// int main(){
-//     int n;
-//     cout<<"Enter n: ";
-//     cin>>n;
-
-//     for(int i=0;i<n;i++){
-//         for(int j=0;j<=i;j++){   
-//             cout<<combn(i,j) << " ";
-//         }cout<<endl;
-//     }
-// }
+    for(int i=0;i<n;i++){
+        for(int j=0;j<=i;j++){   
+            cout<<combn(i,j) << " ";
+        }cout<<endl;
+    }
+}
 
 
 //OPTIMISED PASCLE TRIANGLE
@@ -345,17 +345,17 @@ using namespace std;
 //     cout<< a << " ," << b;
 // }
 
-int main(){
-    int a, b;
-    cout<<"Enter a and b : ";
-    cin>>a >>b;
+// int main(){
+//     int a, b;
+//     cout<<"Enter a and b : ";
+//     cin>>a >>b;
     
-    a = a + b;
-    b = a - b;
-    a = a - b;
+//     a = a + b;
+//     b = a - b;
+//     a = a - b;
     
-    cout<< "Number swaped : "<< a << " ," << b;
-}
+//     cout<< "Number swaped : "<< a << " ," << b;
+// }
 
 
 
