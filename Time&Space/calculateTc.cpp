@@ -10,3 +10,5 @@ int main(){
         cout<<endl;     //0(n)
     }
 }
+
+//fkjbfaf
