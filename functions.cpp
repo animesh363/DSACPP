@@ -1,19 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// int main(){
-//     int n;
-//     cout<< "Enter number: ";
-//     for(int m=0;m<3;m++){
-//         cin>>n;
-//         for(int i=1;i<=n;i++){
-//             for(int j=1; j<=i ;j++){
-//                 cout<<" *";
-//             }
-//             cout<<endl;
-//         }   
-//     } 
-// }
+int main(){
+    int n;
+    cout<< "Enter number: ";
+    for(int m=0;m<3;m++){
+        cin>>n;
+        for(int i=1;i<=n;i++){
+            for(int j=1; j<=i ;j++){
+                cout<<" *";
+            }
+            cout<<endl;
+        }   
+    } 
+}
 
 // void greeting(){
 //     cout<<"Hello!"<<endl;
@@ -62,7 +62,7 @@ using namespace std;
 
 
 
-// ________________________________________________________     PERMUTATION AND COMBINATION     ________________________________________________________
+//? ________________________________________________________     PERMUTATION AND COMBINATION     ________________________________________________________
 
 //COMBIONATION:) choosing r items out of n items  nCr = n! / (r!(n - r)!)
 // int main(){
@@ -192,28 +192,28 @@ using namespace std;
 
 
 //PASCLE TRIANGLE
-int fact(int x){
-    int f = 1;
-    for(int i=2;i<=x;i++){
-        f=f*i;
-    }
-    return f;
-}
-int combn(int n, int r){
-    int ncr = fact(n) / (fact(r) *fact(n-r));
-    return ncr;
-}
-int main(){
-    int n;
-    cout<<"Enter n: ";
-    cin>>n;
+// int fact(int x){
+//     int f = 1;
+//     for(int i=2;i<=x;i++){
+//         f=f*i;
+//     }
+//     return f;
+// }
+// int combn(int n, int r){
+//     int ncr = fact(n) / (fact(r) *fact(n-r));
+//     return ncr;
+// }
+// int main(){
+//     int n;
+//     cout<<"Enter n: ";
+//     cin>>n;
 
-    for(int i=0;i<n;i++){
-        for(int j=0;j<=i;j++){   
-            cout<<combn(i,j) << " ";
-        }cout<<endl;
-    }
-}
+//     for(int i=0;i<n;i++){
+//         for(int j=0;j<=i;j++){   
+//             cout<<combn(i,j) << " ";
+//         }cout<<endl;
+//     }
+// }
 
 
 //OPTIMISED PASCLE TRIANGLE
