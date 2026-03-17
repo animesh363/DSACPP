@@ -36,7 +36,9 @@ int main(){
     //     cout<<endl;
     // }
 
-    //Stroring and printing Transpose
+    //Stroring and printing Transpose   
+    //Random 
+
 
     int Tr[n][m];
 
