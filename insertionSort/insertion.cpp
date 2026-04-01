@@ -1,11 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
-
+ 
 int main(){
     int n=5;
     int arr[n]={5,3,1,4,2};
 
-    cout<<"Element before sorting"<<endl;
+    cout<<"Element before sorting: "<<endl;
     for(int i=0;i<n;i++){ 
         cout<<arr[i]<<" ";
     }
@@ -17,8 +17,6 @@ int main(){
             j--;
         }
     }
-    
-
     cout<<"\nAfter Insertion sort: "<<endl;
     for(int i=0;i<n;i++){ 
         cout<<arr[i]<<" ";
