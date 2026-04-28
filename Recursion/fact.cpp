@@ -1,18 +1,15 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int fact(int n);
-    if(n==0) return;
-    n*fact(n);
+int fact(int n){
+    if(n==1 || n==0) return 1;
+    return n*fact(n-1);
 }
-
-
-
 int main(){
     int n;
     cout<<"Enter n: ";
     cin>>n;
     int x= fact(n);
-    cout<<x;
+    cout<<"Factorial of "<<n <<" is: " <<x;
 
 }
