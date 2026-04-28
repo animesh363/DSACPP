@@ -2,6 +2,7 @@
 using namespace std;
 
 int fact(int n){
+    //base condition
     if(n==1 || n==0) return 1;
     return n*fact(n-1);
 }
