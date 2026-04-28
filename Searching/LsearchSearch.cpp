@@ -14,6 +14,6 @@ int main(){
             break;
         };
     }
-    if(target==target) cout<<"Present";
+    if(target == target) cout<<"Present";
     else cout<< "Not present";
 }
