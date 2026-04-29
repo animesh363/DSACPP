@@ -8,7 +8,7 @@ int main(){
     string ns;
     cout<<"String before sorting: ";
     cout<<s;
-
+    
     for(int i=0;i<s.length();i++){
         if(s[i]>='X'){
             ns.push_back(s[i]);
