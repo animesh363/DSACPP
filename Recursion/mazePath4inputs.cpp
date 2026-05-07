@@ -1,6 +1,14 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// Problem Statement:
+// Find all possible paths in a maze from the top-left corner
+// to the bottom-right corner using recursion.
+// Allowed moves:
+// R -> Right
+// D -> Down
+// Print each valid path like: RRDD, RDRD, etc.
+
 int maze(int sr, int sc, int er , int ec){
     if(sr>er || sc>ec) return 0;
     if(sr==er && sc==er) return 1; // condcn for 1*1 
