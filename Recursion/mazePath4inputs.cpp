@@ -26,6 +26,7 @@ void printPath(int sr, int sc, int er , int ec, string s){
     printPath(sr,sc+1,er,ec,s+'R'); // for Right
     printPath(sr+1,sc,er,ec,s+'D'); // for Left
 }
+
 int main(){
     cout<<"Number of ways: "<< maze(1,1,3,3)<<endl;
     printPath(1,1,3,3,"");
