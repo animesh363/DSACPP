@@ -10,7 +10,6 @@ int pow(int x, int n){
     }else{
         return ans*ans *x;
     }
-    
 }
 int main(){
     int n;
