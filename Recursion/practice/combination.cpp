@@ -10,7 +10,7 @@ void hanoi(int n, char a, char b, char c){
     hanoi(n-1,b,a,c);
 }
 int main(){
-    int n; cout<<"Enter n: "; cin>>n;
-    hanoi(n,'A','B','C');
+    int n; cout<<"Enter n: "; cin>>n; // no of disk
+    hanoi(n,'A','B','C'); // source, helper and destination rods
     cout<<"Total no of steps: " <<steps<<endl;
 }
