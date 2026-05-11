@@ -8,8 +8,6 @@ void printMax(int arr[],int n,int idx,int Max){
     } 
     if(arr[idx]>Max) Max = arr[idx];
     printMax(arr,n,idx+1,Max);
-
-
 }
 int main(){
     int arr[] = {2,5,3,6,6,8};
