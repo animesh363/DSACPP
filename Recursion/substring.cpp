@@ -11,16 +11,15 @@ using namespace std;
 //     pringSubst(ans+ch, original.substr(1));
 // }
 void pringSubst(string ans, string original, int idx){
-    if(original==""){
+    if(idx==original.length()){
         cout<<ans<<endl;
         return;
     }
     char ch =original[idx];
 
-    pringSubst(ans,);
-    pringSubst(ans+ch,);
+    pringSubst(ans,original,idx+1);
+    pringSubst(ans+ch,original,idx+1);
 }
-
 int main(){
     string str="ani";
     // pringSubst("",str);
