@@ -10,6 +10,9 @@ using namespace std;
 //     pringSubst(ans, original.substr(1));
 //     pringSubst(ans+ch, original.substr(1));
 // }
+
+//with indexes
+
 void pringSubst(string ans, string original, int idx){
     if(idx==original.length()){
         cout<<ans<<endl;
