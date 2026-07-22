@@ -9,8 +9,6 @@ int main(){
     for(int ele : arr){
         cout<<ele<<" ";
     }
-
-
     for(int i=0;i<n-1;i++){
         int min=INT_MAX;
         int mindx=-1;
@@ -19,7 +17,6 @@ int main(){
             if(arr[j]<min){
                 min = arr[j];
                 mindx = j;
-
             }
         }
         swap(arr[i],arr[mindx]);
@@ -32,3 +29,6 @@ int main(){
 
 
 }
+
+
+//this is selection sort algorithm which is used to sort the array in increasing order. It works by finding the minimum element from the unsorted part of the array and swapping it with the first unsorted element. This process is repeated for all elements in the array until the entire array is sorted.

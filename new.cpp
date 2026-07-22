@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-class Node{
+class Node{         
     public:
     int data;
     Node* next;
@@ -21,7 +21,6 @@ class Node{
 Node* ConvertArr2LL(vector<int> &arr){
     Node* head = new Node(arr[0]);
     Node* mover = head;
-
     for(int i=1;i<arr.size();i++){
         Node* temp = new Node(arr[i]);
         mover->next = temp;
@@ -31,7 +30,12 @@ Node* ConvertArr2LL(vector<int> &arr){
 }
 int main(){
     vector<int> arr={2,1,3,8};
-
     Node* head= ConvertArr2LL(arr);
-    cout<<head->data;
+    Node* temp=head;
+
+    while(temp){
+        cout<< temp->data <<" ";
+        temp = temp -> next;
+    }
 }
+

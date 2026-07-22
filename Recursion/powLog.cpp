@@ -11,6 +11,7 @@ int pow(int x, int n){
         return ans*ans *x;
     }
 }
+
 int main(){
     int n;
     cout<<"Enter n: ";
