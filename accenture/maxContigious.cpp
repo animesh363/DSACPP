@@ -9,21 +9,17 @@ int maxSub(int arr[], int n){
         else cur=1;
         if(cur>max) max=cur;
     }
-
     return max;
 }
 
 int main(){
     int n;
-    cout<<"Enter n: ";
     cin>>n;
 
     int arr[n];
-    cout<<"Enter n elements of array : ";
     for(int i=0;i<n;i++){
         cin>>arr[i];
     }
     int ans = maxSub(arr, n);
     cout<<"max contigious lenth: "<< ans;
-
 }
