@@ -10,7 +10,7 @@ int main(){
     int n;
     cout<<"Enter n: ";
     cin>>n;
-    int x= fact(n);
-    cout<<"Factorial of "<<n <<" is: " <<x;
+    int ans= fact(n);
+    cout<<"Factorial of "<<n <<" is: " <<ans;
 
 }
