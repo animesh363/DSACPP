@@ -40,7 +40,7 @@ int main(){
 
     // //solution 
     // string str2;
-    // getline(cin,str2);
+    // getline(cin,str2); //-> with the help of this we can take input with space
     // cout<<str2;
 
     // //Q1)Inout a string of length n and count all vovels in the given string.
@@ -198,11 +198,11 @@ int main(){
 
     //Sorting a string using in-built function
 
-    // string s;
-    // cout<<"Enter string: ";
-    // getline(cin,s);
-    // sort(s.begin(),s.end());
-    // cout<<s;
+    string s;
+    cout<<"Enter string: ";
+    getline(cin,s);
+    sort(s.begin(),s.end());
+    cout<<s;
 
 
 
